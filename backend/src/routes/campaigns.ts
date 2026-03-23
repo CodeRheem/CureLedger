@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import Joi from 'joi';
 import { CampaignService } from '@services/CampaignService';
+import { DonationService } from '@services/DonationService';
 import { ApiError } from '@core/ApiError';
 import { ApiResponse } from '@core/ApiResponse';
 import { asyncHandler } from '@helpers/asyncHandler';
@@ -139,6 +140,38 @@ router.patch(
 
       const campaign = await CampaignService.updateCampaign(req.params.id, req.user.userId, req.body);
       ApiResponse.ok(res, 'Campaign updated successfully', campaign);
+    } catch (error) {
+      if (error instanceof ApiError) {
+        res.status(error.getHttpStatus()).json(error.toResponse());
+      } else {
+        throw error;
+      }
+    }
+  })
+);
+
+// GET /campaigns/:id/donations - Get campaign donations
+router.get(
+  '/:id/donations',
+  authenticate,
+  asyncHandler(async (req: Request, res: Response) => {
+    try {
+      if (!req.user || !req.roles) {
+        throw ApiError.unauthorized();
+      }
+
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 20;
+
+      const donations = await DonationService.getCampaignDonations(
+        req.params.id,
+        req.user.userId,
+        req.roles[0],
+        page,
+        limit
+      );
+
+      ApiResponse.ok(res, 'Campaign donations retrieved', donations);
     } catch (error) {
       if (error instanceof ApiError) {
         res.status(error.getHttpStatus()).json(error.toResponse());

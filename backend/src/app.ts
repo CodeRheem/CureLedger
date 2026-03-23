@@ -1,4 +1,5 @@
 import express, { Express, Request, Response, NextFunction } from 'express';
+import routes from './routes';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
@@ -14,6 +15,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Health check route
+
+// Mount API routes
+app.use('/api/v1', routes);
 app.get('/health', (_req: Request, res: Response) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });

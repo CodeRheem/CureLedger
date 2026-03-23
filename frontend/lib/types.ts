@@ -42,13 +42,21 @@ export interface ICampaign {
   title: string;
   description: string;
   condition: string;
+  medicalNeed?: string; // alias for condition
   targetAmount: number;
   raisedAmount: number;
+  amountRaised?: number; // alias for raisedAmount
   donorCount: number;
   status: CampaignStatus;
   recipientId: string;
+  recipientName?: string;
   hospitalId?: string;
+  hospitalName?: string;
+  startDate?: Date;
+  deadline?: Date;
   images: string[];
+  documents?: { name: string; type: string }[];
+  verification?: { hospitalVerified: boolean; adminApproved: boolean };
   createdAt: Date;
   updatedAt: Date;
   endsAt: Date;

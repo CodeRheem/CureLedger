@@ -1,6 +1,12 @@
 import { Schema, model, Document, Types } from 'mongoose';
 import bcryptjs from 'bcryptjs';
-import { UserRole } from './Role';
+
+export enum UserRole {
+  RECIPIENT = 'recipient',
+  HOSPITAL = 'hospital',
+  ADMIN = 'admin',
+  DONOR = 'donor'
+}
 
 export interface IUser extends Document {
   _id: Types.ObjectId;

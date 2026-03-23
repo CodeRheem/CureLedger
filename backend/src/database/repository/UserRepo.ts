@@ -1,4 +1,5 @@
-import UserModel, { IUser, UserRole } from '../model/User';
+import UserModel, { IUser } from '../model/User';
+import { UserRole } from '../model/User';
 import { Types } from 'mongoose';
 
 export class UserRepo {
@@ -23,7 +24,7 @@ export class UserRepo {
   }
 
   static async findByEmailWithPassword(email: string): Promise<IUser | null> {
-    return UserModel.findOne({ email: email.toLowerCase() }).select('+password');
+    return UserModel.findOne({ email: email.toLowerCase() }).select('+password') as any;
   }
 
   static async findByRole(role: UserRole): Promise<IUser[]> {

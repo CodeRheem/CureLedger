@@ -25,6 +25,7 @@
       "@core/*": ["core/*"],
       "@database/*": ["database/*"],
       "@helpers/*": ["helpers/*"],
+      "@services/*": ["services/*"],
       "@routes/*": ["routes/*"],
       "@middlewares/*": ["middlewares/*"],
       "@types/*": ["types/*"],

@@ -51,6 +51,27 @@ export class ApiError extends Error {
     return new ApiError(StatusCode.SERVER_ERROR, message);
   }
 
+  getHttpStatus(): number {
+    switch (this.statusCode) {
+      case StatusCode.UNAUTHORIZED:
+        return 401;
+      case StatusCode.FORBIDDEN:
+        return 403;
+      case StatusCode.NOT_FOUND:
+        return 404;
+      case StatusCode.CONFLICT:
+        return 409;
+      case StatusCode.VALIDATION_ERROR:
+      case StatusCode.UNPROCESSABLE_ENTITY:
+        return 422;
+      case StatusCode.SERVICE_UNAVAILABLE:
+        return 503;
+      case StatusCode.SERVER_ERROR:
+      default:
+        return 500;
+    }
+  }
+
   toResponse(): ApiErrorResponse {
     return {
       statusCode: this.statusCode,

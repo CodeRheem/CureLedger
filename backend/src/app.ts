@@ -3,6 +3,7 @@ import routes from './routes';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+import { ApiError } from '@core/ApiError';
 
 dotenv.config();
 
@@ -25,8 +26,14 @@ app.get('/health', (_req: Request, res: Response) => {
 // Basic error handler
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   console.error(err);
+
+  if (err instanceof ApiError) {
+    res.status(err.getHttpStatus()).json(err.toResponse());
+    return;
+  }
+
   res.status(500).json({
-    statusCode: 'SERVER_ERROR',
+    statusCode: '50000',
     message: err.message || 'Internal Server Error',
     data: null
   });

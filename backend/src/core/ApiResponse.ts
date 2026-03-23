@@ -9,7 +9,9 @@ export interface ApiSuccessResponse<T = any> {
 
 export class ApiResponse {
   static success<T>(res: Response, statusCode: StatusCode, message: string, data: T): Response {
-    return res.status(parseInt(statusCode.slice(0, 3)) || 200).json({
+    const httpStatus = statusCode === StatusCode.CREATED ? 201 : 200;
+
+    return res.status(httpStatus).json({
       statusCode,
       message,
       data

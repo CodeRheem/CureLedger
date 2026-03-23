@@ -1,5 +1,4 @@
 import { CampaignRepo } from '@database/repository/CampaignRepo';
-import { UserRepo } from '@database/repository/UserRepo';
 import { HospitalRepo } from '@database/repository/HospitalRepo';
 import { CampaignDocumentRepo } from '@database/repository/CampaignDocumentRepo';
 import { DonationRepo } from '@database/repository/DonationRepo';

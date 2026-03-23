@@ -48,7 +48,7 @@ router.get(
       });
     } catch (error) {
       if (error instanceof ApiError) {
-        res.status(400).json(error.toResponse());
+        res.status(error.getHttpStatus()).json(error.toResponse());
       } else {
         throw error;
       }
@@ -77,7 +77,7 @@ router.get(
       });
     } catch (error) {
       if (error instanceof ApiError) {
-        res.status(400).json(error.toResponse());
+        res.status(error.getHttpStatus()).json(error.toResponse());
       } else {
         throw error;
       }
@@ -94,8 +94,7 @@ router.get(
       ApiResponse.ok(res, 'Campaign details retrieved', campaign);
     } catch (error) {
       if (error instanceof ApiError) {
-        const statusCode = error.statusCode === 'NOT_FOUND' ? 404 : 400;
-        res.status(statusCode).json(error.toResponse());
+        res.status(error.getHttpStatus()).json(error.toResponse());
       } else {
         throw error;
       }
@@ -119,8 +118,7 @@ router.post(
       ApiResponse.created(res, 'Campaign created successfully', campaign);
     } catch (error) {
       if (error instanceof ApiError) {
-        const statusCode = error.statusCode === 'NOT_FOUND' ? 404 : 400;
-        res.status(statusCode).json(error.toResponse());
+        res.status(error.getHttpStatus()).json(error.toResponse());
       } else {
         throw error;
       }
@@ -143,8 +141,7 @@ router.patch(
       ApiResponse.ok(res, 'Campaign updated successfully', campaign);
     } catch (error) {
       if (error instanceof ApiError) {
-        const statusCode = error.statusCode === 'NOT_FOUND' ? 404 : error.statusCode === 'FORBIDDEN' ? 403 : 400;
-        res.status(statusCode).json(error.toResponse());
+        res.status(error.getHttpStatus()).json(error.toResponse());
       } else {
         throw error;
       }

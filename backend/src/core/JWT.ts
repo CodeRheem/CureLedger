@@ -11,7 +11,7 @@ const JWT_EXPIRATION = process.env.JWT_EXPIRATION || '7d';
 
 export class JWT {
   static generateToken(payload: JwtPayload): string {
-    return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRATION });
+    return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRATION } as any);
   }
 
   static verifyToken(token: string): JwtPayload | null {

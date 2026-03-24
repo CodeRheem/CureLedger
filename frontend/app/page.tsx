@@ -1,8 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { Header } from '@/components/shared/header';
-import { Footer } from '@/components/shared/footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -37,9 +35,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Header />
-
+    <>
       {/* Hero Section */}
       <section className="py-20 px-4 bg-gradient-to-r from-primary/10 to-primary/5">
         <div className="max-w-5xl mx-auto text-center">
@@ -140,8 +136,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      <Footer />
-    </div>
+    </>
   );
 }

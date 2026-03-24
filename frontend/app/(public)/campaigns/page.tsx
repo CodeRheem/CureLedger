@@ -2,8 +2,6 @@
 
 import Link from 'next/link';
 import { useState, useMemo } from 'react';
-import { Header } from '@/components/shared/header';
-import { Footer } from '@/components/shared/footer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -44,9 +42,7 @@ export default function BrowseCampaigns() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Header />
-
+    <>
       {/* Hero Section */}
       <section className="py-12 px-4 bg-muted">
         <div className="max-w-5xl mx-auto text-center">
@@ -150,8 +146,6 @@ export default function BrowseCampaigns() {
           )}
         </div>
       </section>
-
-      <Footer />
-    </div>
+    </>
   );
 }

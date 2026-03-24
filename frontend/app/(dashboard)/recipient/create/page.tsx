@@ -2,19 +2,10 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { hasRole } from '@/lib/auth';
-import { DashboardLayout } from '@/components/shared/dashboard-layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-
-const NAV_ITEMS = [
-  { href: '/recipient', label: 'Dashboard', icon: '📊' },
-  { href: '/recipient/campaigns', label: 'My Campaigns', icon: '📋' },
-  { href: '/recipient/create', label: 'Create Campaign', icon: '➕' },
-  { href: '/recipient/profile', label: 'Profile', icon: '👤' },
-];
 
 export default function CreateCampaignPage() {
   const router = useRouter();
@@ -48,9 +39,8 @@ export default function CreateCampaignPage() {
     setIsLoading(true);
 
     try {
-      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      router.push('/recipient/campaigns');
+      router.push('/recipient');
     } catch (error) {
       console.error('Error creating campaign:', error);
     } finally {
@@ -68,181 +58,183 @@ export default function CreateCampaignPage() {
   };
 
   return (
-    <DashboardLayout
-      navItems={NAV_ITEMS}
-      sidebarColor="#0077BE"
-      role="recipient"
-    >
-      <div className="max-w-2xl">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Create Campaign</h1>
-          <p className="text-muted-foreground">
-            Step {step} of 2: {step === 1 ? 'Campaign Details' : 'Medical Documents'}
-          </p>
-        </div>
-
-        {/* Progress Bar */}
-        <div className="flex gap-2 mb-8">
-          <div className={`flex-1 h-2 rounded-full ${step >= 1 ? 'bg-primary' : 'bg-muted'}`}></div>
-          <div className={`flex-1 h-2 rounded-full ${step >= 2 ? 'bg-primary' : 'bg-muted'}`}></div>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Campaign Information</CardTitle>
-            <CardDescription>
-              {step === 1
-                ? 'Tell your story and explain your medical need'
-                : 'Upload medical documents to verify your case'}
-            </CardDescription>
-          </CardHeader>
-
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {step === 1 ? (
-                <>
-                  <div>
-                    <Input
-                      type="text"
-                      name="title"
-                      placeholder="e.g., Heart Surgery Fundraiser"
-                      value={formData.title}
-                      onChange={handleChange}
-                      required
-                      label="Campaign Title"
-                    />
-                  </div>
-
-                  <div>
-                    <Textarea
-                      name="description"
-                      placeholder="Share your story..."
-                      value={formData.description}
-                      onChange={handleChange}
-                      required
-                      label="Campaign Description"
-                      rows={5}
-                    />
-                  </div>
-
-                  <div>
-                    <Input
-                      type="text"
-                      name="medicalNeed"
-                      placeholder="e.g., Open-heart surgery"
-                      value={formData.medicalNeed}
-                      onChange={handleChange}
-                      required
-                      label="Medical Need"
-                    />
-                  </div>
-
-                  <div className="flex gap-3">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => router.back()}
-                      className="flex-1"
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={() => setStep(2)}
-                      disabled={!canProceed()}
-                      className="flex-1"
-                    >
-                      Next Step
-                    </Button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div>
-                    <Input
-                      type="text"
-                      name="hospital"
-                      placeholder="e.g., National Hospital Abuja"
-                      value={formData.hospital}
-                      onChange={handleChange}
-                      required
-                      label="Hospital Name"
-                    />
-                  </div>
-
-                  <div>
-                    <Input
-                      type="number"
-                      name="targetAmount"
-                      placeholder="2500000"
-                      value={formData.targetAmount}
-                      onChange={handleChange}
-                      required
-                      label="Target Amount (₦)"
-                    />
-                  </div>
-
-                  <div>
-                    <Input
-                      type="date"
-                      name="deadline"
-                      value={formData.deadline}
-                      onChange={handleChange}
-                      required
-                      label="Campaign Deadline"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold mb-3">
-                      Medical Documents
-                    </label>
-                    <div className="border-2 border-dashed border-input rounded-lg p-8 text-center hover:bg-muted/50 transition">
-                      <input
-                        type="file"
-                        multiple
-                        accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                        onChange={handleFileChange}
-                        className="hidden"
-                        id="documents"
-                      />
-                      <label htmlFor="documents" className="cursor-pointer block">
-                        <p className="text-2xl mb-2">📄</p>
-                        <p className="font-semibold mb-1">
-                          {formData.documents.length > 0
-                            ? `${formData.documents.length} file(s) selected`
-                            : 'Click to upload medical documents'}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          PDF, DOC, JPG, PNG up to 10MB each
-                        </p>
-                      </label>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setStep(1)}
-                      className="flex-1"
-                    >
-                      Back
-                    </Button>
-                    <Button
-                      type="submit"
-                      disabled={!canProceed() || isLoading || formData.documents.length === 0}
-                      className="flex-1"
-                    >
-                      {isLoading ? 'Creating...' : 'Create Campaign'}
-                    </Button>
-                  </div>
-                </>
-              )}
-            </form>
-          </CardContent>
-        </Card>
+    <div className="max-w-2xl mx-auto">
+      <div className="mb-8">
+        <h1 className="font-heading text-3xl font-bold text-foreground mb-2">Create Campaign</h1>
+        <p className="text-muted-foreground">
+          Step {step} of 2: {step === 1 ? 'Campaign Details' : 'Medical Documents'}
+        </p>
       </div>
-    </DashboardLayout>
+
+      {/* Progress Bar */}
+      <div className="flex gap-2 mb-8">
+        <div className={`flex-1 h-2 rounded-full ${step >= 1 ? 'bg-primary' : 'bg-gray-200'}`}></div>
+        <div className={`flex-1 h-2 rounded-full ${step >= 2 ? 'bg-primary' : 'bg-gray-200'}`}></div>
+      </div>
+
+      <Card className="border-border">
+        <CardHeader>
+          <CardTitle className="font-heading">Campaign Information</CardTitle>
+          <CardDescription>
+            {step === 1
+              ? 'Tell your story and explain your medical need'
+              : 'Upload medical documents to verify your case'}
+          </CardDescription>
+        </CardHeader>
+
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {step === 1 ? (
+              <>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">Campaign Title</label>
+                  <Input
+                    type="text"
+                    name="title"
+                    placeholder="e.g., Heart Surgery Fundraiser"
+                    value={formData.title}
+                    onChange={handleChange}
+                    required
+                    className="h-11"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">Campaign Description</label>
+                  <Textarea
+                    name="description"
+                    placeholder="Share your story..."
+                    value={formData.description}
+                    onChange={handleChange}
+                    required
+                    rows={5}
+                    className="resize-none"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">Medical Need</label>
+                  <Input
+                    type="text"
+                    name="medicalNeed"
+                    placeholder="e.g., Open-heart surgery"
+                    value={formData.medicalNeed}
+                    onChange={handleChange}
+                    required
+                    className="h-11"
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => router.back()}
+                    className="flex-1 h-11"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={() => setStep(2)}
+                    disabled={!canProceed()}
+                    className="flex-1 h-11"
+                  >
+                    Next Step
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">Hospital Name</label>
+                  <Input
+                    type="text"
+                    name="hospital"
+                    placeholder="e.g., National Hospital Abuja"
+                    value={formData.hospital}
+                    onChange={handleChange}
+                    required
+                    className="h-11"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">Target Amount (₦)</label>
+                  <Input
+                    type="number"
+                    name="targetAmount"
+                    placeholder="2500000"
+                    value={formData.targetAmount}
+                    onChange={handleChange}
+                    required
+                    className="h-11"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">Campaign Deadline</label>
+                  <Input
+                    type="date"
+                    name="deadline"
+                    value={formData.deadline}
+                    onChange={handleChange}
+                    required
+                    className="h-11"
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <label className="text-sm font-medium text-foreground">Medical Documents</label>
+                  <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-red-300 hover:bg-red-50/30 transition cursor-pointer">
+                    <input
+                      type="file"
+                      multiple
+                      accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                      onChange={handleFileChange}
+                      className="hidden"
+                      id="documents"
+                    />
+                    <label htmlFor="documents" className="cursor-pointer block">
+                      <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-red-50 flex items-center justify-center">
+                        <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m6.75 12H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                        </svg>
+                      </div>
+                      <p className="font-medium text-foreground mb-1">
+                        {formData.documents.length > 0
+                          ? `${formData.documents.length} file(s) selected`
+                          : 'Click to upload medical documents'}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        PDF, DOC, JPG, PNG up to 10MB each
+                      </p>
+                    </label>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setStep(1)}
+                    className="flex-1 h-11"
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={!canProceed() || isLoading || formData.documents.length === 0}
+                    className="flex-1 h-11"
+                  >
+                    {isLoading ? 'Creating...' : 'Create Campaign'}
+                  </Button>
+                </div>
+              </>
+            )}
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

@@ -35,11 +35,11 @@ export default function BrowseCampaigns() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'approved':
-        return <Badge className="bg-green-100 text-green-700 hover:bg-green-100">Verified</Badge>;
+        return <Badge className="badge-success">Verified</Badge>;
       case 'pending_admin':
-        return <Badge className="bg-yellow-100 text-yellow-700 hover:bg-yellow-100">Pending</Badge>;
+        return <Badge className="badge-warning">Pending</Badge>;
       case 'pending_hospital':
-        return <Badge className="bg-red-100 text-red-700 hover:bg-red-100">Under Review</Badge>;
+        return <Badge className="badge-error">Under Review</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -113,8 +113,8 @@ export default function BrowseCampaigns() {
         <div className="container mx-auto px-4">
           {filtered.length === 0 ? (
             <div className="text-center py-20">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-50 flex items-center justify-center">
-                <svg className="w-8 h-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full empty-state-bg flex items-center justify-center">
+                <svg className="w-8 h-8 empty-state-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.196 10.196Z" />
                 </svg>
               </div>
@@ -132,7 +132,7 @@ export default function BrowseCampaigns() {
                 
                 return (
                   <Link key={campaign.id} href={`/campaign/${campaign.id}`}>
-                    <Card className="h-full border-border hover:border-red-300 hover:shadow-lg transition-all duration-300 group cursor-pointer">
+                    <Card className="h-full border-border hover-lint hover:shadow-lg transition-all duration-300 group cursor-pointer">
                       {/* Campaign Image */}
                       <div className="relative h-40 overflow-hidden rounded-t-lg">
                         <img 
@@ -164,7 +164,7 @@ export default function BrowseCampaigns() {
 
                         {/* Progress */}
                         <div className="mb-3">
-                          <div className="h-2 bg-red-100 rounded-full overflow-hidden">
+                          <div className="h-2 progress-track">
                             <div
                               className="h-full bg-primary rounded-full transition-all"
                               style={{ width: `${progress}%` }}

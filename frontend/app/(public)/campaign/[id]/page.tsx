@@ -18,9 +18,9 @@ export default function CampaignDetail() {
   if (!campaign) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-50 flex items-center justify-center">
-            <svg className="w-8 h-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+          <div className="text-center">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full empty-state-bg flex items-center justify-center">
+            <svg className="w-8 h-8 empty-state-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.196 10.196Z" />
             </svg>
           </div>
@@ -119,7 +119,7 @@ export default function CampaignDetail() {
                   <CardTitle className="font-heading text-xl">Verification Status</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-red-50 rounded-lg">
+                  <div className="flex items-center justify-between p-4 info-box">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
                         <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
@@ -131,11 +131,11 @@ export default function CampaignDetail() {
                         <p className="text-sm text-muted-foreground">Verified by {campaign.hospitalName}</p>
                       </div>
                     </div>
-                    <Badge className={campaign.verification?.hospitalVerified ? 'bg-green-100 text-green-700 hover:bg-green-100' : 'bg-yellow-100 text-yellow-700'}>
+                    <Badge className={campaign.verification?.hospitalVerified ? 'badge-success' : 'badge-warning'}>
                       {campaign.verification?.hospitalVerified ? 'Verified' : 'Pending'}
                     </Badge>
                   </div>
-                  <div className="flex items-center justify-between p-4 bg-red-50 rounded-lg">
+                  <div className="flex items-center justify-between p-4 info-box">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
                         <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
@@ -147,7 +147,7 @@ export default function CampaignDetail() {
                         <p className="text-sm text-muted-foreground">Final review completed</p>
                       </div>
                     </div>
-                    <Badge className={campaign.verification?.adminApproved ? 'bg-green-100 text-green-700 hover:bg-green-100' : 'bg-yellow-100 text-yellow-700'}>
+                    <Badge className={campaign.verification?.adminApproved ? 'badge-success' : 'badge-warning'}>
                       {campaign.verification?.adminApproved ? 'Approved' : 'Pending'}
                     </Badge>
                   </div>
@@ -202,7 +202,7 @@ export default function CampaignDetail() {
 
                   {/* Progress */}
                   <div>
-                    <div className="h-3 bg-red-100 rounded-full overflow-hidden">
+                    <div className="h-3 progress-track">
                       <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${progressPercentage}%` }} />
                     </div>
                     <div className="flex justify-between mt-2 text-sm">

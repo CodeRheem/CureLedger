@@ -114,4 +114,54 @@
   .font-body {
     font-family: var(--font-inter), sans-serif;
   }
+
+  /* Status Badge Colors */
+  .badge-success {
+    @apply bg-green-100 text-green-700 hover:bg-green-100;
+  }
+  
+  .badge-warning {
+    @apply bg-yellow-100 text-yellow-700 hover:bg-yellow-100;
+  }
+  
+  .badge-error {
+    @apply bg-red-100 text-red-700 hover:bg-red-100;
+  }
+
+  .badge-neutral {
+    @apply bg-gray-100 text-gray-700 hover:bg-gray-100;
+  }
+
+  /* Hover States */
+  .hover-lint {
+    @apply border-border hover:border-red-300 hover:bg-red-50/30 transition;
+  }
+
+  /* Empty State */
+  .empty-state-bg {
+    @apply bg-red-50;
+  }
+  
+  .empty-state-icon {
+    @apply text-primary;
+  }
+
+  /* Progress Bar */
+  .progress-track {
+    @apply bg-red-100 rounded-full overflow-hidden;
+  }
+
+  /* Danger Actions */
+  .btn-danger {
+    @apply bg-red-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-red-700;
+  }
+  
+  .btn-danger-ghost {
+    @apply text-red-600 hover:text-red-700;
+  }
+
+  /* Info Box */
+  .info-box {
+    @apply bg-red-50 border border-red-200 rounded-lg;
+  }
 }

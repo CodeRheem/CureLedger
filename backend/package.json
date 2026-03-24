@@ -12,6 +12,7 @@
     "test": "jest",
     "test:watch": "jest --watch"
   },
+  "type": "module",
   "keywords": [
     "health",
     "crowdfunding",
@@ -31,6 +32,7 @@
     "mongoose": "^7.6.0"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.19",
     "@types/express": "^4.17.20",
@@ -46,6 +48,7 @@
     "ts-node": "^10.9.1",
     "tsc-alias": "^1.8.16",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "typescript-eslint": "^8.57.2"
   }
 }

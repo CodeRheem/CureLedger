@@ -1,7 +1,5 @@
 'use client';
 
-import { Header } from '@/components/shared/header';
-import { Footer } from '@/components/shared/footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function About() {
@@ -27,9 +25,7 @@ export default function About() {
   ];
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Header />
-
+    <>
       {/* Hero */}
       <section className="py-20 px-4 bg-gradient-to-r from-primary/10 to-primary/5">
         <div className="max-w-5xl mx-auto text-center">
@@ -139,8 +135,6 @@ export default function About() {
           </div>
         </div>
       </section>
-
-      <Footer />
-    </div>
+    </>
   );
 }

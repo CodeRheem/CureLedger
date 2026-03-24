@@ -1,42 +1,70 @@
+'use client';
+
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { mockCampaigns } from '@/lib/mock-data';
+import { StatsCard } from '@/components/shared/stats-card';
+
 export default function HospitalDashboardPage() {
+  const pendingCampaigns = mockCampaigns.filter(c => c.status === 'pending_hospital');
+
   return (
-    <div>
-      {/* Stats */}
-      <div className="grid md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-lg shadow">
-          <p className="text-gray-600 text-sm font-semibold mb-2">PENDING VERIFICATIONS</p>
-          <p className="text-4xl font-bold text-yellow-600">3</p>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <p className="text-gray-600 text-sm font-semibold mb-2">VERIFIED PATIENTS</p>
-          <p className="text-4xl font-bold text-green-600">12</p>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <p className="text-gray-600 text-sm font-semibold mb-2">VERIFIED CAMPAIGNS</p>
-          <p className="text-4xl font-bold text-blue-600">12</p>
-        </div>
+    <div className="max-w-6xl">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="font-heading text-3xl font-bold text-foreground mb-2">Hospital Dashboard</h1>
+        <p className="text-muted-foreground">Verify and manage patient campaigns</p>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid md:grid-cols-3 gap-4 mb-8">
+        <StatsCard label="Pending Verifications" value={pendingCampaigns.length} variant="yellow" />
+        <StatsCard label="Verified Patients" value="12" variant="green" />
+        <StatsCard label="Verified Campaigns" value="12" variant="blue" />
       </div>
 
       {/* Pending Verifications */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-2xl font-bold mb-6">Pending Verifications</h2>
-        <div className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="border rounded-lg p-4 hover:shadow-md transition">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="font-semibold text-lg">Life-Saving Heart Surgery</h3>
-                  <p className="text-gray-600">Recipient: Tobi Johnson</p>
-                  <p className="text-sm text-gray-500">Submitted 2 days ago</p>
+      <Card className="border-border">
+        <CardHeader>
+          <CardTitle className="font-heading">Pending Verifications</CardTitle>
+          <CardDescription>Review and verify patient medical documents</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {pendingCampaigns.length > 0 ? (
+            <div className="space-y-4">
+              {pendingCampaigns.map((campaign) => (
+                <div key={campaign.id} className="border border-border rounded-lg p-5 hover-lint">
+                  <div className="flex justify-between items-start gap-4">
+                    <div className="flex-1">
+                      <h3 className="font-heading font-semibold text-lg text-foreground">{campaign.title}</h3>
+                      <p className="text-sm text-muted-foreground mt-1">Recipient: {campaign.recipientName}</p>
+                      <p className="text-sm text-muted-foreground">Hospital: {campaign.hospitalName}</p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <Badge className="badge-warning">Pending Review</Badge>
+                        <span className="text-xs text-muted-foreground">Submitted 2 days ago</span>
+                      </div>
+                    </div>
+                    <Link href={`/hospital/verify/${campaign.id}`}>
+                      <Button>Review</Button>
+                    </Link>
+                  </div>
                 </div>
-                <a href="/hospital/verify/campaign-x" className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700">
-                  Review
-                </a>
-              </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </div>
+          ) : (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-50 flex items-center justify-center">
+                <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                </svg>
+              </div>
+              <p className="text-muted-foreground">No pending verifications</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { mockCampaigns } from '@/lib/mock-data';
 
@@ -13,118 +14,171 @@ export default function CampaignDetail() {
   const campaignId = params.id as string;
   const campaign = mockCampaigns.find((c) => c.id === campaignId);
   const [donationAmount, setDonationAmount] = useState('');
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [paymentStep, setPaymentStep] = useState<'form' | 'processing' | 'success'>('form');
+  const [cardDetails, setCardDetails] = useState({ number: '', expiry: '', cvv: '', name: '' });
 
   if (!campaign) {
     return (
-      <div className="flex flex-col">
-        <div className="flex-1 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-white">
           <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4">Campaign Not Found</h1>
-            <Link href="/campaigns">
-              <Button>Back to Campaigns</Button>
-            </Link>
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full empty-state-bg flex items-center justify-center">
+            <svg className="w-8 h-8 empty-state-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.196 10.196Z" />
+            </svg>
           </div>
+          <h1 className="text-2xl font-heading font-bold mb-4">Campaign Not Found</h1>
+          <Link href="/campaigns">
+            <Button>Back to Campaigns</Button>
+          </Link>
         </div>
       </div>
     );
   }
 
-  const progressPercentage = Math.min((( campaign.amountRaised || campaign.raisedAmount) / campaign.targetAmount) * 100, 100);
+  const progressPercentage = Math.min(((campaign.amountRaised || campaign.raisedAmount) / campaign.targetAmount) * 100, 100);
   const daysLeft = Math.max(
     Math.floor((new Date(campaign.deadline || campaign.endsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
     0
   );
+  const raised = campaign.amountRaised || campaign.raisedAmount || 0;
 
   return (
-    <div className="flex-1 py-12 px-4">
-      <div className="max-w-5xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-start justify-between gap-4 mb-4">
-              <div className="flex-1">
-                <h1 className="text-4xl font-bold mb-2">{campaign.title}</h1>
-                <p className="text-muted-foreground text-lg">By {campaign.recipientName}</p>
-              </div>
-              <Badge className="text-lg px-4 py-2">{campaign.status.replace('_', ' ')}</Badge>
-            </div>
-          </div>
+    <div className="min-h-screen bg-white">
+      {/* Breadcrumb */}
+      <div className="border-b border-border bg-white">
+        <div className="container mx-auto px-4 py-4">
+          <Link href="/campaigns" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+            </svg>
+            Back to Campaigns
+          </Link>
+        </div>
+      </div>
 
+      {/* Hero */}
+      <section className="py-8 bg-gradient-to-br from-red-50 via-white to-red-50/30">
+        <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-3 gap-8">
-            {/* Main Content */}
+            {/* Main Info */}
             <div className="md:col-span-2 space-y-6">
-              {/* Campaign Details */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Campaign Details</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-lg text-muted-foreground">{campaign.description}</p>
+              {/* Image */}
+              <div className="relative h-64 md:h-80 rounded-xl overflow-hidden">
+                <img 
+                  src={campaign.images?.[0] || 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800'} 
+                  alt={campaign.title}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute top-4 left-4">
+                  <Badge className="bg-white/90 text-foreground hover:bg-white">
+                    {campaign.status === 'approved' ? 'Verified' : campaign.status.replace(/_/g, ' ')}
+                  </Badge>
+                </div>
+              </div>
 
-                  <div className="grid sm:grid-cols-2 gap-4 pt-4 border-t border-input">
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">Medical Need</p>
-                      <p className="font-semibold">{campaign.medicalNeed || campaign.condition}</p>
+              {/* Title */}
+              <div>
+                <h1 className="font-heading text-3xl md:text-4xl font-bold text-foreground mb-2">
+                  {campaign.title}
+                </h1>
+                <p className="text-lg text-muted-foreground">
+                  By <span className="font-medium text-foreground">{campaign.recipientName}</span>
+                </p>
+              </div>
+
+              {/* Details Card */}
+              <Card className="border-border">
+                <CardHeader>
+                  <CardTitle className="font-heading text-xl">Campaign Details</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <p className="text-muted-foreground leading-relaxed">{campaign.description}</p>
+
+                  <div className="grid sm:grid-cols-2 gap-4 pt-4 border-t border-border">
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Medical Need</p>
+                      <p className="font-semibold text-foreground">{campaign.medicalNeed || campaign.condition}</p>
                     </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">Hospital</p>
-                      <p className="font-semibold">{campaign.hospitalName}</p>
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Hospital</p>
+                      <p className="font-semibold text-foreground">{campaign.hospitalName}</p>
                     </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">Start Date</p>
-                      <p className="font-semibold">{new Date(campaign.startDate || campaign.createdAt).toLocaleDateString()}</p>
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Start Date</p>
+                      <p className="font-semibold text-foreground">{new Date(campaign.startDate || campaign.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                     </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">Deadline</p>
-                      <p className="font-semibold">{new Date(campaign.deadline || campaign.endsAt).toLocaleDateString()}</p>
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Deadline</p>
+                      <p className="font-semibold text-foreground">{new Date(campaign.deadline || campaign.endsAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
               {/* Verification Status */}
-              {campaign.verification && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Verification Status</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="flex items-center justify-between p-3 bg-muted/50 rounded">
-                      <span>Hospital Verification</span>
-                      <Badge variant={campaign.verification.hospitalVerified ? 'default' : 'secondary'}>
-                        {campaign.verification.hospitalVerified ? '✓ Verified' : 'Pending'}
-                      </Badge>
+              <Card className="border-border">
+                <CardHeader>
+                  <CardTitle className="font-heading text-xl">Verification Status</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between p-4 info-box">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                        <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.196 10.196Z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="font-medium text-foreground">Hospital Verification</p>
+                        <p className="text-sm text-muted-foreground">Verified by {campaign.hospitalName}</p>
+                      </div>
                     </div>
-                    <div className="flex items-center justify-between p-3 bg-muted/50 rounded">
-                      <span>Admin Approval</span>
-                      <Badge variant={campaign.verification.adminApproved ? 'default' : 'secondary'}>
-                        {campaign.verification.adminApproved ? '✓ Approved' : 'Pending'}
-                      </Badge>
+                    <Badge className={campaign.verification?.hospitalVerified ? 'badge-success' : 'badge-warning'}>
+                      {campaign.verification?.hospitalVerified ? 'Verified' : 'Pending'}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between p-4 info-box">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                        <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="font-medium text-foreground">Admin Approval</p>
+                        <p className="text-sm text-muted-foreground">Final review completed</p>
+                      </div>
                     </div>
-                  </CardContent>
-                </Card>
-              )}
+                    <Badge className={campaign.verification?.adminApproved ? 'badge-success' : 'badge-warning'}>
+                      {campaign.verification?.adminApproved ? 'Approved' : 'Pending'}
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
 
               {/* Documents */}
-              <Card>
+              <Card className="border-border">
                 <CardHeader>
-                  <CardTitle className="text-lg">Medical Documents</CardTitle>
+                  <CardTitle className="font-heading text-xl">Medical Documents</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     {campaign.documents && campaign.documents.length > 0 ? (
                       campaign.documents.map((doc, idx) => (
-                        <div
-                          key={idx}
-                          className="flex items-center justify-between p-3 border border-input rounded hover:bg-muted/50 transition"
-                        >
+                        <div key={idx} className="flex items-center justify-between p-4 border border-border rounded-lg hover:border-red-300 hover:bg-red-50/50 transition">
                           <div className="flex items-center gap-3">
-                            <span className="text-2xl">📄</span>
+                            <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center">
+                              <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                              </svg>
+                            </div>
                             <div>
-                              <p className="font-semibold text-sm">{doc.name}</p>
-                              <p className="text-xs text-muted-foreground">{doc.type}</p>
+                              <p className="font-medium text-foreground">{doc.name}</p>
+                              <p className="text-sm text-muted-foreground">{doc.type}</p>
                             </div>
                           </div>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="outline" size="sm">
                             Download
                           </Button>
                         </div>
@@ -137,72 +191,210 @@ export default function CampaignDetail() {
               </Card>
             </div>
 
-            {/* Sidebar: Funding and Donate */}
+            {/* Sidebar */}
             <div className="md:col-span-1">
-              <Card className="sticky top-20">
-                <CardHeader>
-                  <CardTitle>Funding Goal: ₦{(campaign.targetAmount / 1_000_000).toFixed(1)}M</CardTitle>
+              <Card className="sticky top-24 border-border shadow-lg">
+                <CardHeader className="pb-4">
+                  <CardTitle className="font-heading text-xl">Funding Goal</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  {/* Progress Bar */}
+                <CardContent className="space-y-6">
+                  {/* Amount */}
+                  <div className="text-center">
+                    <p className="text-4xl font-heading font-bold text-primary">₦{(campaign.targetAmount / 1_000_000).toFixed(1)}M</p>
+                  </div>
+
+                  {/* Progress */}
                   <div>
-                    <div className="bg-muted rounded-full h-3 overflow-hidden mb-2">
-                      <div
-                        className="bg-primary h-full transition-all"
-                        style={{ width: `${progressPercentage}%` }}
-                      />
+                    <div className="h-3 progress-track">
+                      <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${progressPercentage}%` }} />
                     </div>
-                    <div className="flex justify-between text-sm text-muted-foreground">
-                      <span>₦{((campaign.amountRaised || campaign.raisedAmount) / 1_000_000).toFixed(1)}M raised</span>
-                      <span>{Math.round(progressPercentage)}%</span>
+                    <div className="flex justify-between mt-2 text-sm">
+                      <span className="font-medium text-foreground">₦{(raised / 1_000_000).toFixed(1)}M raised</span>
+                      <span className="text-muted-foreground">{Math.round(progressPercentage)}%</span>
                     </div>
                   </div>
 
                   {/* Stats */}
-                  <div className="space-y-2 py-4 border-t border-b border-input">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Donors</span>
-                      <span className="font-semibold">{campaign.donorCount}</span>
+                  <div className="grid grid-cols-2 gap-4 py-4 border-t border-b border-border">
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-foreground">{campaign.donorCount}</p>
+                      <p className="text-sm text-muted-foreground">Donors</p>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Days Left</span>
-                      <span className="font-semibold">{daysLeft}</span>
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-foreground">{daysLeft}</p>
+                      <p className="text-sm text-muted-foreground">Days Left</p>
                     </div>
                   </div>
 
-                  {/* Donate Form */}
+                  {/* Donate */}
                   {campaign.status === 'approved' ? (
                     <div className="space-y-3">
-                      <input
+                      <Input
                         type="number"
                         placeholder="Enter amount (₦)"
                         value={donationAmount}
                         onChange={(e) => setDonationAmount(e.target.value)}
-                        className="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground"
+                        className="h-12 text-center"
                       />
-                      <Button className="w-full">Donate Now</Button>
+                      <Button 
+                        className="w-full h-12 text-base font-medium"
+                        onClick={() => setShowPaymentModal(true)}
+                        disabled={!donationAmount || parseInt(donationAmount) <= 0}
+                      >
+                        Donate Now
+                      </Button>
                     </div>
                   ) : (
-                    <Button className="w-full" disabled>
+                    <Button className="w-full h-12" disabled>
                       Campaign Not Live
                     </Button>
                   )}
 
-                  <p className="text-xs text-muted-foreground text-center">
+                  <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1">
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0 0 12 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75Z" />
+                    </svg>
                     Secure payment via Interswitch
                   </p>
                 </CardContent>
               </Card>
             </div>
           </div>
+        </div>
+      </section>
 
-          {/* Back Link */}
-          <div className="mt-12">
-            <Link href="/campaigns">
-              <Button variant="outline">← Back to Campaigns</Button>
-            </Link>
+      {/* Payment Modal */}
+      {showPaymentModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            {paymentStep === 'form' && (
+              <>
+                <div className="p-6 border-b border-border">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-heading text-xl font-bold">Payment Details</h3>
+                    <button onClick={() => setShowPaymentModal(false)} className="text-muted-foreground hover:text-foreground">
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-1">Donating ₦{parseInt(donationAmount).toLocaleString()} to {campaign?.title}</p>
+                </div>
+                <div className="p-6 space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-foreground mb-2 block">Card Number</label>
+                    <Input
+                      placeholder="1234 5678 9012 3456"
+                      value={cardDetails.number}
+                      onChange={(e) => setCardDetails({...cardDetails, number: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-foreground mb-2 block">Cardholder Name</label>
+                    <Input
+                      placeholder="John Doe"
+                      value={cardDetails.name}
+                      onChange={(e) => setCardDetails({...cardDetails, name: e.target.value})}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-foreground mb-2 block">Expiry Date</label>
+                      <Input
+                        placeholder="MM/YY"
+                        value={cardDetails.expiry}
+                        onChange={(e) => setCardDetails({...cardDetails, expiry: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-foreground mb-2 block">CVV</label>
+                      <Input
+                        placeholder="123"
+                        value={cardDetails.cvv}
+                        onChange={(e) => setCardDetails({...cardDetails, cvv: e.target.value})}
+                      />
+                    </div>
+                  </div>
+                  <div className="p-4 bg-muted/50 rounded-lg">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Donation Amount</span>
+                      <span className="font-bold text-foreground">₦{parseInt(donationAmount).toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-sm mt-2">
+                      <span className="text-muted-foreground">Processing Fee</span>
+                      <span className="font-bold text-foreground">₦0</span>
+                    </div>
+                    <div className="flex justify-between text-sm mt-2 pt-2 border-t border-border">
+                      <span className="font-medium text-foreground">Total</span>
+                      <span className="font-bold text-primary">₦{parseInt(donationAmount).toLocaleString()}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-6 border-t border-border">
+                  <Button 
+                    className="w-full" 
+                    onClick={() => {
+                      setPaymentStep('processing');
+                      setTimeout(() => {
+                        setPaymentStep('success');
+                      }, 2000);
+                    }}
+                    disabled={!cardDetails.number || !cardDetails.expiry || !cardDetails.cvv || !cardDetails.name}
+                  >
+                    Pay ₦{parseInt(donationAmount).toLocaleString()}
+                  </Button>
+                  <div className="flex items-center justify-center gap-2 mt-4 text-xs text-muted-foreground">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0 0 12 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75Z" />
+                    </svg>
+                    Secured by Interswitch
+                  </div>
+                </div>
+              </>
+            )}
+            {paymentStep === 'processing' && (
+              <div className="p-12 text-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full empty-state-bg flex items-center justify-center">
+                  <svg className="w-8 h-8 empty-state-icon animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                </div>
+                <h3 className="font-heading text-xl font-bold mb-2">Processing Payment</h3>
+                <p className="text-muted-foreground">Please wait while we process your donation...</p>
+              </div>
+            )}
+            {paymentStep === 'success' && (
+              <div className="p-12 text-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center">
+                  <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                </div>
+                <h3 className="font-heading text-xl font-bold mb-2">Donation Successful!</h3>
+                <p className="text-muted-foreground mb-6">Thank you for your generous donation of ₦{parseInt(donationAmount).toLocaleString()}</p>
+                <div className="space-y-3">
+                  <Button className="w-full" onClick={() => {
+                    setShowPaymentModal(false);
+                    setPaymentStep('form');
+                    setDonationAmount('');
+                    setCardDetails({ number: '', expiry: '', cvv: '', name: '' });
+                  }}>
+                    Donate Again
+                  </Button>
+                  <Button variant="outline" className="w-full" onClick={() => {
+                    setShowPaymentModal(false);
+                    setPaymentStep('form');
+                    setDonationAmount('');
+                    setCardDetails({ number: '', expiry: '', cvv: '', name: '' });
+                  }}>
+                    Close
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
+      )}
     </div>
   );
 }

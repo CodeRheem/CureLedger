@@ -8,7 +8,7 @@
 | `/campaigns`     | Browse all verified campaigns (donors can view without login) | ~        |
 | `/campaign/[id]` | Campaign detail page - full info, donate button               |          |
 | `/about`         | About page - mission, how funds work                          |          |
-| `/faq`           | FAQ page                                                      |          |
+| `/faq`           | FAQ page                                                      |          |                                                      |          |
 
 ## Auth Routes
 

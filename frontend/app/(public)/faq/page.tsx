@@ -1,117 +1,159 @@
 'use client';
 
 import { useState } from 'react';
+import { Header } from '@/components/shared/header';
+import { Footer } from '@/components/shared/footer';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
-const faqs = [
-  {
-    id: 1,
-    question: 'How does CureLedger work?',
-    answer:
-      'Patients create campaigns with medical documentation, hospitals verify authenticity, admins approve verified campaigns, and donors can then contribute funds to help save lives.',
-  },
-  {
-    id: 2,
-    question: 'Is my donation secure?',
-    answer:
-      'Yes, all donations are processed through secure payment gateways using industry-standard encryption. We partner with trusted payment providers to ensure your financial information is protected.',
-  },
-  {
-    id: 3,
-    question: 'How do I know a campaign is legitimate?',
-    answer:
-      'All campaigns on CureLedger have been verified by certified hospitals and reviewed by our admin team. We only display campaigns that meet our strict verification standards.',
-  },
-  {
-    id: 4,
-    question: 'Can I get a refund for my donation?',
-    answer:
-      'Donations are generally non-refundable as they directly support patient care. However, if there are exceptional circumstances, please contact our support team.',
-  },
-  {
-    id: 5,
-    question: 'How long do campaigns run?',
-    answer:
-      'Campaigns typically run for 120 days (4 months). However, if a campaign reaches its target amount before the deadline, it may close early.',
-  },
-  {
-    id: 6,
-    question: 'What happens after a campaign reaches its goal?',
-    answer:
-      'Once a campaign reaches its funding goal, the patient can request a withdrawal. Funds are then transferred to their verified hospital account within 5-7 business days.',
-  },
-  {
-    id: 7,
-    question: 'How do I create a campaign?',
-    answer:
-      'First, register as a recipient on CureLedger. Then provide your personal information, medical details, hospital documents, and create your campaign. Your hospital will verify the documents before it goes live.',
-  },
-  {
-    id: 8,
-    question: 'What documents do I need to upload?',
-    answer:
-      'You will need to upload medical reports, prescriptions, hospital recommendation letters, and proof of medical need. Exact requirements depend on your medical condition.',
-  },
-];
+interface FAQItem {
+  question: string;
+  answer: string;
+  category: 'general' | 'donors' | 'recipients' | 'hospitals';
+}
 
-export default function FAQPage() {
-  const [expandedId, setExpandedId] = useState<number | null>(null);
+export default function FAQ() {
+  const [openId, setOpenId] = useState<number | null>(0);
+  const [activeCategory, setActiveCategory] = useState<string>('general');
+
+  const faqs: FAQItem[] = [
+    {
+      category: 'general',
+      question: 'What is CureLedger?',
+      answer:
+        'CureLedger is a transparent health crowdfunding platform that connects patients seeking medical support with compassionate donors. All campaigns are verified by hospitals and approved by admins to ensure authenticity.',
+    },
+    {
+      category: 'general',
+      question: 'Is CureLedger legitimate and safe?',
+      answer:
+        'Yes. Every campaign is verified by verified hospitals and approved by our admin team. We use bank-level encryption for payments and maintain complete transparency of fund flow.',
+    },
+    {
+      category: 'donors',
+      question: 'How do I donate to a campaign?',
+      answer:
+        'Browse approved campaigns, select one, enter your donation amount, and complete payment via our secure Interswitch integration. You can track your donation in real-time.',
+    },
+    {
+      category: 'donors',
+      question: 'Can I get a receipt for tax purposes?',
+      answer:
+        'Yes. All donors receive receipts that can be used for tax deductions in applicable jurisdictions. Download receipts from your donor dashboard.',
+    },
+    {
+      category: 'recipients',
+      question: 'How do I start a campaign as a patient?',
+      answer:
+        'Register as a recipient, complete your profile with medical documents, create a campaign with your story, and submit for hospital verification. Once verified and admin-approved, your campaign goes live.',
+    },
+    {
+      category: 'recipients',
+      question: 'What documents do I need to upload?',
+      answer:
+        'You need medical documents like doctor letters, medical reports, and hospital recommendations to verify your medical condition. These are shared only with hospitals and admins.',
+    },
+    {
+      category: 'hospitals',
+      question: 'How can my hospital partner with CureLedger?',
+      answer:
+        'Contact our hospital partnerships team at partners@cureledger.com. We partner with accredited hospitals to verify campaign authenticity.',
+    },
+    {
+      category: 'hospitals',
+      question: 'What is the hospital verification process?',
+      answer:
+        'Hospitals review submitted medical documents, verify the patient identity, confirm the medical need, and approve or reject campaigns based on authenticity.',
+    },
+  ];
+
+  const filtered = faqs.filter(
+    (faq) => activeCategory === 'general' || faq.category === activeCategory
+  );
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-3xl mx-auto py-20 px-4">
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold mb-4">Frequently Asked Questions</h1>
-          <p className="text-xl text-gray-600">
+    <div className="min-h-screen bg-background flex flex-col">
+      <Header />
+
+      {/* Hero */}
+      <section className="py-20 px-4 bg-gradient-to-r from-primary/10 to-primary/5">
+        <div className="max-w-5xl mx-auto text-center">
+          <h1 className="text-4xl font-bold mb-4">Frequently Asked Questions</h1>
+          <p className="text-xl text-muted-foreground">
             Find answers to common questions about CureLedger
           </p>
         </div>
+      </section>
 
-        <div className="space-y-4">
-          {faqs.map((faq) => (
-            <div
-              key={faq.id}
-              className="bg-white rounded-lg border hover:shadow-md transition"
-            >
-              <button
-                onClick={() =>
-                  setExpandedId(expandedId === faq.id ? null : faq.id)
-                }
-                className="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50"
+      {/* FAQ Section */}
+      <section className="py-20 px-4 flex-1">
+        <div className="max-w-3xl mx-auto">
+          {/* Category Filter */}
+          <div className="flex flex-wrap gap-2 mb-8 justify-center">
+            {['general', 'donors', 'recipients', 'hospitals'].map((cat) => (
+              <Button
+                key={cat}
+                variant={activeCategory === cat ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setActiveCategory(cat)}
               >
-                <h3 className="font-semibold text-lg">{faq.question}</h3>
-                <span
-                  className={`text-2xl text-blue-600 transition-transform ${
-                    expandedId === faq.id ? 'rotate-180' : ''
-                  }`}
-                >
-                  ▼
-                </span>
-              </button>
+                {cat.charAt(0).toUpperCase() + cat.slice(1)}
+              </Button>
+            ))}
+          </div>
 
-              {expandedId === faq.id && (
-                <div className="px-6 pb-6 text-gray-700 border-t">
-                  {faq.answer}
+          {/* FAQ Items */}
+          <div className="space-y-4">
+            {filtered.map((faq, idx) => (
+              <div
+                key={idx}
+                className="rounded-lg border border-input bg-background shadow-sm cursor-pointer hover:shadow-md transition"
+                onClick={() => setOpenId(openId === idx ? null : idx)}
+              >
+                <div className="border-b border-input px-6 py-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">{faq.question}</h3>
+                    <span className="text-2xl">
+                      {openId === idx ? '−' : '+'}
+                    </span>
+                  </div>
                 </div>
-              )}
-            </div>
-          ))}
-        </div>
+                {openId === idx && (
+                  <CardContent>
+                    <p className="text-muted-foreground">{faq.answer}</p>
+                  </CardContent>
+                )}
+              </div>
+            ))}
+          </div>
 
-        <div className="mt-12 bg-blue-50 rounded-lg p-8 text-center">
-          <h3 className="text-xl font-semibold mb-2">
-            Can't find your answer?
-          </h3>
-          <p className="text-gray-700 mb-4">
-            Contact our support team for further assistance
-          </p>
-          <a
-            href="mailto:support@cureledger.com"
-            className="text-blue-600 hover:underline font-semibold"
-          >
-            support@cureledger.com
-          </a>
+          {/* Contact Section */}
+          <Card className="mt-12 bg-primary/5">
+            <CardHeader>
+              <CardTitle className="text-center">Still have questions?</CardTitle>
+              <CardDescription className="text-center">
+                Contact our support team
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center">
+              <p className="mb-6">
+                Email:{' '}
+                <a href="mailto:support@cureledger.com" className="font-semibold text-primary hover:underline">
+                  support@cureledger.com
+                </a>
+              </p>
+              <p>
+                Phone:{' '}
+                <a href="tel:+2348XXXXXXXX" className="font-semibold text-primary hover:underline">
+                  +234 8XX XXX XXXX
+                </a>
+              </p>
+            </CardContent>
+          </Card>
         </div>
-      </div>
+      </section>
+
+      <Footer />
     </div>
   );
 }

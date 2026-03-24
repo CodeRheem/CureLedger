@@ -4,7 +4,7 @@
   "description": "CureLedger health crowdfunding platform backend",
   "main": "dist/server.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && tsc-alias",
     "start": "node dist/server.js",
     "dev": "ts-node --files -r tsconfig-paths/register src/server.ts",
     "dev:watch": "nodemon --exec \"ts-node --files -r tsconfig-paths/register\" src/server.ts",
@@ -12,6 +12,7 @@
     "test": "jest",
     "test:watch": "jest --watch"
   },
+  "type": "module",
   "keywords": [
     "health",
     "crowdfunding",
@@ -31,20 +32,23 @@
     "mongoose": "^7.6.0"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.19",
     "@types/express": "^4.17.20",
     "@types/jest": "^29.5.7",
     "@types/jsonwebtoken": "^9.0.5",
     "@types/node": "^20.8.0",
-    "@typescript-eslint/eslint-plugin": "^6.9.0",
-    "@typescript-eslint/parser": "^6.9.0",
-    "eslint": "^8.51.0",
+    "@typescript-eslint/eslint-plugin": "^8.57.2",
+    "@typescript-eslint/parser": "^8.57.2",
+    "eslint": "^10.1.0",
     "jest": "^29.7.0",
     "nodemon": "^3.0.1",
     "ts-jest": "^29.1.1",
-    "tsconfig-paths": "^4.2.0",
     "ts-node": "^10.9.1",
-    "typescript": "^5.2.2"
+    "tsc-alias": "^1.8.16",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.2.2",
+    "typescript-eslint": "^8.57.2"
   }
 }

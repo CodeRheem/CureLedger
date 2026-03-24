@@ -14,6 +14,9 @@ export default function CampaignDetail() {
   const campaignId = params.id as string;
   const campaign = mockCampaigns.find((c) => c.id === campaignId);
   const [donationAmount, setDonationAmount] = useState('');
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [paymentStep, setPaymentStep] = useState<'form' | 'processing' | 'success'>('form');
+  const [cardDetails, setCardDetails] = useState({ number: '', expiry: '', cvv: '', name: '' });
 
   if (!campaign) {
     return (
@@ -233,7 +236,11 @@ export default function CampaignDetail() {
                         onChange={(e) => setDonationAmount(e.target.value)}
                         className="h-12 text-center"
                       />
-                      <Button className="w-full h-12 text-base font-medium">
+                      <Button 
+                        className="w-full h-12 text-base font-medium"
+                        onClick={() => setShowPaymentModal(true)}
+                        disabled={!donationAmount || parseInt(donationAmount) <= 0}
+                      >
                         Donate Now
                       </Button>
                     </div>
@@ -255,6 +262,139 @@ export default function CampaignDetail() {
           </div>
         </div>
       </section>
+
+      {/* Payment Modal */}
+      {showPaymentModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            {paymentStep === 'form' && (
+              <>
+                <div className="p-6 border-b border-border">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-heading text-xl font-bold">Payment Details</h3>
+                    <button onClick={() => setShowPaymentModal(false)} className="text-muted-foreground hover:text-foreground">
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-1">Donating ₦{parseInt(donationAmount).toLocaleString()} to {campaign?.title}</p>
+                </div>
+                <div className="p-6 space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-foreground mb-2 block">Card Number</label>
+                    <Input
+                      placeholder="1234 5678 9012 3456"
+                      value={cardDetails.number}
+                      onChange={(e) => setCardDetails({...cardDetails, number: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-foreground mb-2 block">Cardholder Name</label>
+                    <Input
+                      placeholder="John Doe"
+                      value={cardDetails.name}
+                      onChange={(e) => setCardDetails({...cardDetails, name: e.target.value})}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-foreground mb-2 block">Expiry Date</label>
+                      <Input
+                        placeholder="MM/YY"
+                        value={cardDetails.expiry}
+                        onChange={(e) => setCardDetails({...cardDetails, expiry: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-foreground mb-2 block">CVV</label>
+                      <Input
+                        placeholder="123"
+                        value={cardDetails.cvv}
+                        onChange={(e) => setCardDetails({...cardDetails, cvv: e.target.value})}
+                      />
+                    </div>
+                  </div>
+                  <div className="p-4 bg-muted/50 rounded-lg">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Donation Amount</span>
+                      <span className="font-bold text-foreground">₦{parseInt(donationAmount).toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-sm mt-2">
+                      <span className="text-muted-foreground">Processing Fee</span>
+                      <span className="font-bold text-foreground">₦0</span>
+                    </div>
+                    <div className="flex justify-between text-sm mt-2 pt-2 border-t border-border">
+                      <span className="font-medium text-foreground">Total</span>
+                      <span className="font-bold text-primary">₦{parseInt(donationAmount).toLocaleString()}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-6 border-t border-border">
+                  <Button 
+                    className="w-full" 
+                    onClick={() => {
+                      setPaymentStep('processing');
+                      setTimeout(() => {
+                        setPaymentStep('success');
+                      }, 2000);
+                    }}
+                    disabled={!cardDetails.number || !cardDetails.expiry || !cardDetails.cvv || !cardDetails.name}
+                  >
+                    Pay ₦{parseInt(donationAmount).toLocaleString()}
+                  </Button>
+                  <div className="flex items-center justify-center gap-2 mt-4 text-xs text-muted-foreground">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0 0 12 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75Z" />
+                    </svg>
+                    Secured by Interswitch
+                  </div>
+                </div>
+              </>
+            )}
+            {paymentStep === 'processing' && (
+              <div className="p-12 text-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full empty-state-bg flex items-center justify-center">
+                  <svg className="w-8 h-8 empty-state-icon animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                </div>
+                <h3 className="font-heading text-xl font-bold mb-2">Processing Payment</h3>
+                <p className="text-muted-foreground">Please wait while we process your donation...</p>
+              </div>
+            )}
+            {paymentStep === 'success' && (
+              <div className="p-12 text-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center">
+                  <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                </div>
+                <h3 className="font-heading text-xl font-bold mb-2">Donation Successful!</h3>
+                <p className="text-muted-foreground mb-6">Thank you for your generous donation of ₦{parseInt(donationAmount).toLocaleString()}</p>
+                <div className="space-y-3">
+                  <Button className="w-full" onClick={() => {
+                    setShowPaymentModal(false);
+                    setPaymentStep('form');
+                    setDonationAmount('');
+                    setCardDetails({ number: '', expiry: '', cvv: '', name: '' });
+                  }}>
+                    Donate Again
+                  </Button>
+                  <Button variant="outline" className="w-full" onClick={() => {
+                    setShowPaymentModal(false);
+                    setPaymentStep('form');
+                    setDonationAmount('');
+                    setCardDetails({ number: '', expiry: '', cvv: '', name: '' });
+                  }}>
+                    Close
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

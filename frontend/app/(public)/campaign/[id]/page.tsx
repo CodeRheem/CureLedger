@@ -3,8 +3,6 @@
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { Header } from '@/components/shared/header';
-import { Footer } from '@/components/shared/footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -18,8 +16,7 @@ export default function CampaignDetail() {
 
   if (!campaign) {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
-        <Header />
+      <div className="flex flex-col">
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-bold mb-4">Campaign Not Found</h1>
@@ -28,7 +25,6 @@ export default function CampaignDetail() {
             </Link>
           </div>
         </div>
-        <Footer />
       </div>
     );
   }
@@ -40,11 +36,8 @@ export default function CampaignDetail() {
   );
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Header />
-
-      <div className="flex-1 py-12 px-4">
-        <div className="max-w-5xl mx-auto">
+    <div className="flex-1 py-12 px-4">
+      <div className="max-w-5xl mx-auto">
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-start justify-between gap-4 mb-4">
@@ -210,9 +203,6 @@ export default function CampaignDetail() {
             </Link>
           </div>
         </div>
-      </div>
-
-      <Footer />
     </div>
   );
 }

@@ -1,8 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { Header } from '@/components/shared/header';
-import { Footer } from '@/components/shared/footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
@@ -72,9 +70,7 @@ export default function FAQ() {
   );
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Header />
-
+    <div className="flex flex-col">
       {/* Hero */}
       <section className="py-20 px-4 bg-gradient-to-r from-primary/10 to-primary/5">
         <div className="max-w-5xl mx-auto text-center">
@@ -152,8 +148,6 @@ export default function FAQ() {
           </Card>
         </div>
       </section>
-
-      <Footer />
     </div>
   );
 }

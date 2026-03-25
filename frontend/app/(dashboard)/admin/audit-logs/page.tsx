@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { StatsCard } from '@/components/shared/stats-card';
 
 interface AuditLog {
   id: string;
@@ -135,37 +136,17 @@ export default function AdminAuditLogsPage() {
         <p className="text-muted-foreground">Track all administrative actions on the platform</p>
       </div>
 
-      <div className="grid md:grid-cols-4 gap-4 mb-8">
-        <Card className="border-border">
-          <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground mb-1">Total Actions</p>
-            <p className="text-3xl font-bold text-foreground">{mockLogs.length}</p>
-          </CardContent>
-        </Card>
-        <Card className="border-border">
-          <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground mb-1">Approvals</p>
-            <p className="text-3xl font-bold text-green-600">
-              {mockLogs.filter((l) => l.action.includes('APPROVE')).length}
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="border-border">
-          <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground mb-1">Rejections</p>
-            <p className="text-3xl font-bold text-red-600">
-              {mockLogs.filter((l) => l.action.includes('REJECT') || l.action.includes('SUSPEND')).length}
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="border-border">
-          <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground mb-1">Fund Movements</p>
-            <p className="text-3xl font-bold text-yellow-600">
-              {mockLogs.filter((l) => l.action.includes('WITHDRAW') || l.action.includes('DIVERT')).length}
-            </p>
-          </CardContent>
-        </Card>
+      <div className="grid gap-4 md:grid-cols-4 mb-8">
+        <StatsCard label="Total Actions" value={mockLogs.length} />
+        <StatsCard label="Approvals" value={mockLogs.filter((l) => l.action.includes('APPROVE')).length} />
+        <StatsCard
+          label="Rejections"
+          value={mockLogs.filter((l) => l.action.includes('REJECT') || l.action.includes('SUSPEND')).length}
+        />
+        <StatsCard
+          label="Fund Movements"
+          value={mockLogs.filter((l) => l.action.includes('WITHDRAW') || l.action.includes('DIVERT')).length}
+        />
       </div>
 
       <Card className="border-border">

@@ -115,7 +115,6 @@ export default function AdminApprovalsPage() {
                   <PendingApprovalItem
                     key={approval.id}
                     approval={approval}
-                    getConfidenceBg={getConfidenceBg}
                     getConfidenceColor={getConfidenceColor}
                     onReview={() => {
                       setSelectedApproval(approval);

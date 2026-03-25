@@ -16,6 +16,12 @@ export default function RecipientCampaignPage() {
 
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
+  const [editData, setEditData] = useState({
+    title: '',
+    description: '',
+    targetAmount: 0,
+  });
 
   if (!campaign) {
     return (
@@ -70,7 +76,14 @@ export default function RecipientCampaignPage() {
             </div>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline">Edit Campaign</Button>
+            <Button variant="outline" onClick={() => {
+              setEditData({
+                title: campaign.title,
+                description: campaign.description,
+                targetAmount: campaign.targetAmount,
+              });
+              setIsEditing(true);
+            }}>Edit Campaign</Button>
             {campaign.status === 'approved' && (
               <Button onClick={() => setShowWithdrawModal(true)}>Request Withdrawal</Button>
             )}
@@ -168,7 +181,46 @@ export default function RecipientCampaignPage() {
           <CardTitle className="font-heading">Description</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground leading-relaxed">{campaign.description}</p>
+          {isEditing ? (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Campaign Title</label>
+                <input
+                  type="text"
+                  value={editData.title}
+                  onChange={(e) => setEditData({ ...editData, title: e.target.value })}
+                  className="w-full p-3 border border-input rounded-lg"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Description</label>
+                <textarea
+                  value={editData.description}
+                  onChange={(e) => setEditData({ ...editData, description: e.target.value })}
+                  rows={5}
+                  className="w-full p-3 border border-input rounded-lg resize-none"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Target Amount (₦)</label>
+                <input
+                  type="number"
+                  value={editData.targetAmount}
+                  onChange={(e) => setEditData({ ...editData, targetAmount: parseInt(e.target.value) })}
+                  className="w-full p-3 border border-input rounded-lg"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button onClick={() => {
+                  alert('Campaign updated successfully!');
+                  setIsEditing(false);
+                }}>Save Changes</Button>
+                <Button variant="outline" onClick={() => setIsEditing(false)}>Cancel</Button>
+              </div>
+            </div>
+          ) : (
+            <p className="text-muted-foreground leading-relaxed">{campaign.description}</p>
+          )}
         </CardContent>
       </Card>
 

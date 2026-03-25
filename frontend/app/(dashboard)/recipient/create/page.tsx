@@ -3,11 +3,19 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { HugeiconsIcon } from '@hugeicons/react';
-import { CheckmarkCircle02Icon, FileUploadIcon } from '@hugeicons/core-free-icons';
+import { CheckmarkCircle02Icon, FileUploadIcon, AlertIcon } from '@hugeicons/core-free-icons';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { mockHospitals } from '@/lib/mock-data';
+
+const verifiedHospitals = mockHospitals.map(h => ({
+  id: h.id,
+  name: h.hospitalName,
+  license: h.hospitalLicense,
+  address: h.address,
+}));
 
 export default function CreateCampaignPage() {
   const router = useRouter();
@@ -25,7 +33,10 @@ export default function CreateCampaignPage() {
     documents: [] as File[],
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const profileComplete = true;
+  const missingFields: string[] = [];
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     if (errors[e.target.name]) {
       setErrors({ ...errors, [e.target.name]: '' });
@@ -141,6 +152,30 @@ export default function CreateCampaignPage() {
     );
   }
 
+  if (!profileComplete) {
+    return (
+      <div className="max-w-2xl mx-auto">
+        <Card className="border-border">
+          <CardContent className="py-12 text-center">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-yellow-100 flex items-center justify-center">
+              <HugeiconsIcon icon={AlertIcon} className="w-10 h-10 text-yellow-600" strokeWidth={1.5} />
+            </div>
+            <h2 className="font-heading text-2xl font-bold text-foreground mb-2">Complete Your Profile</h2>
+            <p className="text-muted-foreground mb-4">
+              You need to complete your profile before creating a campaign.
+            </p>
+            <p className="text-sm text-yellow-600 mb-6">
+              Missing: {missingFields.join(', ')}
+            </p>
+            <Button onClick={() => router.push('/recipient/profile')}>
+              Go to Profile
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-8">
@@ -231,16 +266,23 @@ export default function CreateCampaignPage() {
             ) : (
               <>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">Hospital Name</label>
-                  <Input
-                    type="text"
+                  <label className="text-sm font-medium text-foreground">Select Hospital *</label>
+                  <select
                     name="hospital"
-                    placeholder="e.g., National Hospital Abuja"
                     value={formData.hospital}
                     onChange={handleChange}
-                    className={`h-11 ${errors.hospital ? 'border-red-500' : ''}`}
-                  />
+                    className={`w-full h-11 px-3 rounded-md border border-input bg-background text-sm ${errors.hospital ? 'border-red-500' : ''}`}
+                    required
+                  >
+                    <option value="">Select a verified hospital</option>
+                    {verifiedHospitals.map(h => (
+                      <option key={h.id} value={h.name}>
+                        {h.name} - {h.address}
+                      </option>
+                    ))}
+                  </select>
                   {errors.hospital && <p className="text-sm text-red-500">{errors.hospital}</p>}
+                  <p className="text-xs text-muted-foreground">Only verified hospitals are shown</p>
                 </div>
 
                 <div className="space-y-2">

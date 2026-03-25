@@ -7,6 +7,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
+interface ProfileStatus {
+  complete: boolean;
+  missingFields: string[];
+}
+
 export default function RecipientProfilePage() {
   const [saved, setSaved] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -16,12 +21,29 @@ export default function RecipientProfilePage() {
     email: 'jane@example.com',
     phone: '+2348098765432',
     bvn: '12345678901',
+    nin: '',
+    dateOfBirth: '',
+    gender: '',
+    address: '',
+    city: '',
+    state: '',
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
     setSaved(false);
   };
+
+  const checkProfileComplete = (): ProfileStatus => {
+    const requiredFields = ['firstName', 'lastName', 'phone', 'nin', 'dateOfBirth', 'gender', 'address', 'city', 'state'];
+    const missingFields = requiredFields.filter(field => !profile[field as keyof typeof profile]);
+    return {
+      complete: missingFields.length === 0,
+      missingFields
+    };
+  };
+
+  const profileStatus = checkProfileComplete();
 
   const handleSave = async () => {
     setIsLoading(true);
@@ -38,6 +60,20 @@ export default function RecipientProfilePage() {
         <p className="text-muted-foreground">Manage your personal information</p>
       </div>
 
+      {!profileStatus.complete && (
+        <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <div className="flex items-center gap-2 mb-2">
+            <svg className="w-5 h-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.019-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+            </svg>
+            <p className="font-medium text-yellow-800">Profile Incomplete</p>
+          </div>
+          <p className="text-sm text-yellow-700">
+            Please complete your profile to create a campaign. Missing: {profileStatus.missingFields.join(', ')}
+          </p>
+        </div>
+      )}
+
       <Card className="border-border mb-6">
         <CardContent className="pt-6">
           <div className="flex items-center gap-6">
@@ -47,7 +83,11 @@ export default function RecipientProfilePage() {
             <div>
               <h2 className="font-heading text-xl font-semibold mb-1">{profile.firstName} {profile.lastName}</h2>
               <p className="text-sm text-muted-foreground mb-3">{profile.email}</p>
-              <Button variant="outline" size="sm">Update Photo</Button>
+              <div className="flex items-center gap-2">
+                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${profileStatus.complete ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                  {profileStatus.complete ? 'Profile Complete' : 'Profile Incomplete'}
+                </span>
+              </div>
             </div>
           </div>
         </CardContent>
@@ -56,50 +96,135 @@ export default function RecipientProfilePage() {
       <Card className="border-border">
         <CardHeader>
           <CardTitle className="font-heading">Personal Details</CardTitle>
-          <CardDescription>Update your information</CardDescription>
+          <CardDescription>Complete all fields to create campaigns</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">First Name *</label>
+              <Input
+                type="text"
+                name="firstName"
+                value={profile.firstName}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Last Name *</label>
+              <Input
+                type="text"
+                name="lastName"
+                value={profile.lastName}
+                onChange={handleChange}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Email</label>
+              <Input
+                type="email"
+                name="email"
+                value={profile.email}
+                onChange={handleChange}
+                disabled
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Phone *</label>
+              <Input
+                type="tel"
+                name="phone"
+                value={profile.phone}
+                onChange={handleChange}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">NIN *</label>
+              <Input
+                type="text"
+                name="nin"
+                value={profile.nin}
+                onChange={handleChange}
+                placeholder="Enter your NIN"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Date of Birth *</label>
+              <Input
+                type="date"
+                name="dateOfBirth"
+                value={profile.dateOfBirth}
+                onChange={handleChange}
+                required
+              />
+            </div>
+          </div>
+
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">First Name</label>
+            <label className="text-sm font-medium text-foreground">Gender *</label>
+            <select
+              name="gender"
+              value={profile.gender}
+              onChange={handleChange}
+              className="w-full h-11 px-3 rounded-md border border-input bg-background text-sm"
+              required
+            >
+              <option value="">Select gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">Address *</label>
             <Input
               type="text"
-              name="firstName"
-              value={profile.firstName}
+              name="address"
+              value={profile.address}
               onChange={handleChange}
+              placeholder="Street address"
+              required
             />
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Last Name</label>
-            <Input
-              type="text"
-              name="lastName"
-              value={profile.lastName}
-              onChange={handleChange}
-            />
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">City *</label>
+              <Input
+                type="text"
+                name="city"
+                value={profile.city}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">State *</label>
+              <Input
+                type="text"
+                name="state"
+                value={profile.state}
+                onChange={handleChange}
+                required
+              />
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Email</label>
-            <Input
-              type="email"
-              name="email"
-              value={profile.email}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Phone</label>
-            <Input
-              type="tel"
-              name="phone"
-              value={profile.phone}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="space-y-2">
+          <div className="space-y-2 pt-4 border-t">
             <label className="text-sm font-medium text-foreground">BVN</label>
             <Input type="text" value={profile.bvn} disabled />
             <p className="text-xs text-muted-foreground">Cannot be changed</p>

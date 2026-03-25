@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import { env } from '@config/env';
 
 export interface JwtPayload {
   userId: string;
@@ -6,17 +7,14 @@ export interface JwtPayload {
   roles: string[];
 }
 
-const JWT_SECRET = process.env.JWT_SECRET || 'default-secret-change-in-production';
-const JWT_EXPIRATION = process.env.JWT_EXPIRATION || '7d';
-
 export class JWT {
   static generateToken(payload: JwtPayload): string {
-    return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRATION } as any);
+    return jwt.sign(payload, env.JWT_SECRET, { expiresIn: env.JWT_EXPIRATION } as any);
   }
 
   static verifyToken(token: string): JwtPayload | null {
     try {
-      return jwt.verify(token, JWT_SECRET) as JwtPayload;
+      return jwt.verify(token, env.JWT_SECRET) as JwtPayload;
     } catch (error) {
       return null;
     }

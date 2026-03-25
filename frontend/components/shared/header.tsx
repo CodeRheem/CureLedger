@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { HeartCheckIcon } from '@hugeicons/core-free-icons';
 import { Button } from '@/components/ui/button';
 
 const navLinks = [
@@ -20,7 +22,7 @@ export function Header() {
         <div className="flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-white">
-              <HeartPulseIcon className="h-5 w-5" />
+              <HugeiconsIcon icon={HeartCheckIcon} className="h-5 w-5" strokeWidth={1.5} />
             </div>
             <span className="font-heading text-xl font-bold text-primary">CureLedger</span>
           </Link>
@@ -30,9 +32,8 @@ export function Header() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-sm font-medium transition-colors hover:text-primary ${
-                  pathname === link.href ? 'text-primary' : 'text-muted-foreground'
-                }`}
+                className={`text-sm font-medium transition-colors hover:text-primary ${pathname === link.href ? 'text-primary' : 'text-muted-foreground'
+                  }`}
               >
                 {link.label}
               </Link>
@@ -54,23 +55,5 @@ export function Header() {
         </div>
       </div>
     </header>
-  );
-}
-
-function HeartPulseIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-      <path d="M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27" />
-    </svg>
   );
 }

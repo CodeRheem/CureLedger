@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { HugeiconsIcon } from '@hugeicons/react';
 import {
   AlertCircleIcon,
@@ -12,7 +13,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { useRouter } from 'next/navigation';
+import { api } from '@/lib/api';
 
 const roles = [
   {
@@ -27,20 +28,65 @@ const roles = [
     description: 'Verify campaign authenticity',
     icon: Hospital02Icon,
   },
+  {
+    value: 'admin',
+    label: 'Admin',
+    description: 'Manage platform',
+    icon: Settings03Icon,
+  },
 ];
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('recipient');
-  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const router = useRouter();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const validate = (): boolean => {
+    const newErrors: { email?: string; password?: string } = {};
+    
+    if (!email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+    
+    if (!password) {
+      newErrors.password = 'Password is required';
+    } else if (password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validate()) return;
+    
+    setIsLoading(true);
+    setError('');
 
-    if (role === 'recipient') router.push('/recipient');
-    else if (role === 'hospital') router.push('/hospital');
-    else if (role === 'admin') router.push('/admin');
+    try {
+      const data = await api.login(email, password);
+      localStorage.setItem('authToken', data.token);
+      localStorage.setItem('userRole', role);
+      localStorage.setItem('userEmail', email);
+      localStorage.setItem('userName', `${data.user.firstName} ${data.user.lastName}`);
+
+      if (role === 'recipient') router.push('/recipient');
+      else if (role === 'hospital') router.push('/hospital');
+      else if (role === 'admin') router.push('/admin');
+    } catch (err: any) {
+      setError(err.message || 'Login failed');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -51,7 +97,7 @@ export default function LoginPage() {
       </CardHeader>
 
       <CardContent>
-        <form className="space-y-5">
+        <form onSubmit={handleLogin} className="space-y-5">
           {/* Role Selection */}
           <div>
             <label className="block text-sm font-medium text-foreground mb-3">Select your role</label>
@@ -82,10 +128,11 @@ export default function LoginPage() {
               type="email"
               placeholder="name@example.com"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => { setEmail(e.target.value); setErrors({ ...errors, email: undefined }); }}
               required
-              className="h-11"
+              className={`h-11 ${errors.email ? 'border-red-500' : ''}`}
             />
+            {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
           </div>
 
           {/* Password */}
@@ -95,10 +142,11 @@ export default function LoginPage() {
               type="password"
               placeholder="••••••••"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => { setPassword(e.target.value); setErrors({ ...errors, password: undefined }); }}
               required
-              className="h-11"
+              className={`h-11 ${errors.password ? 'border-red-500' : ''}`}
             />
+            {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
           </div>
 
           {/* Demo Notice */}
@@ -109,8 +157,13 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <Button type="submit" onSubmit={handleLogin} className="w-full h-11 text-base font-medium" size="lg">
-            Sign In
+          {error && (
+            <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+              {error}
+            </div>
+          )}
+          <Button type="submit" disabled={isLoading} className="w-full h-11 text-base font-medium" size="lg">
+            {isLoading ? 'Signing in...' : 'Sign In'}
           </Button>
         </form>
 

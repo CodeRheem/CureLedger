@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
 
 export default function RecipientSettingsPage() {
   const [passwords, setPasswords] = useState({
@@ -25,11 +26,11 @@ export default function RecipientSettingsPage() {
 
   const handleSavePassword = () => {
     if (passwords.new !== passwords.confirm) {
-      alert('Passwords do not match');
+      toast.error('Passwords do not match');
       return;
     }
     if (passwords.new.length < 6) {
-      alert('Password must be at least 6 characters');
+      toast.error('Password must be at least 6 characters');
       return;
     }
     setSaved(true);

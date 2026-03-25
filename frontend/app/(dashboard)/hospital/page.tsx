@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { CheckmarkCircle02Icon } from '@hugeicons/core-free-icons';
 import { Button } from '@/components/ui/button';
@@ -8,9 +9,26 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { mockCampaigns } from '@/lib/mock-data';
 import { StatsCard } from '@/components/shared/stats-card';
+import { api } from '@/lib/api';
 
 export default function HospitalDashboardPage() {
-  const pendingCampaigns = mockCampaigns.filter(c => c.status === 'pending_hospital');
+  const [pendingCampaigns, setPendingCampaigns] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchPendingCampaigns() {
+      try {
+        const data = await api.getPendingCampaigns('pending_hospital');
+        setPendingCampaigns(data.campaigns || []);
+      } catch (err) {
+        console.error('Failed to fetch pending campaigns:', err);
+        setPendingCampaigns(mockCampaigns.filter(c => c.status === 'pending_hospital'));
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchPendingCampaigns();
+  }, []);
 
   return (
     <div className="max-w-6xl">
@@ -34,7 +52,22 @@ export default function HospitalDashboardPage() {
           <CardDescription>Review and verify patient medical documents</CardDescription>
         </CardHeader>
         <CardContent>
-          {pendingCampaigns.length > 0 ? (
+          {loading ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="border border-border rounded-lg p-5 animate-pulse">
+                  <div className="flex justify-between items-start gap-4">
+                    <div className="flex-1 space-y-2">
+                      <div className="h-5 bg-gray-200 rounded w-3/4" />
+                      <div className="h-4 bg-gray-200 rounded w-1/2" />
+                      <div className="h-4 bg-gray-200 rounded w-1/3" />
+                    </div>
+                    <div className="h-10 bg-gray-200 rounded w-20" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : pendingCampaigns.length > 0 ? (
             <div className="space-y-4">
               {pendingCampaigns.map((campaign) => (
                 <div key={campaign.id} className="border border-border rounded-lg p-5 hover-lint">

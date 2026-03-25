@@ -1,33 +1,29 @@
-# dashbord - recipient
+# TODO
 
-[] recipient/campaigns and recipient/campaign + {id}, merge them into one, i designed a recipient to have multiple campaigns before, but a recipient is just supposed to have one campaign at a time ( why would a patient have multiple funding cases, they should just be under a single umbrella)
+## Backend - Missing Endpoints (7 items - COMMENTED OUT, AWAITING REVIEW)
 
-[] on the campaign section, it should render a create campaign button if no campaign exists yet
+All 7 endpoints have been implemented but commented out for backend dev review:
+- GET /hospitals
+- PATCH /profile
+- GET /withdrawals
+- GET /admin/stats
+- GET /verifications/history
+- GET /admin/audit-logs
+- GET /campaigns/pending (hospital filtering)
 
-[] profile field should be more robust, NIN, age e.t.c
+## Frontend - API Integration (COMPLETED)
 
-[] the create campaign field should only be possible if personal details are complete
+- [x] Created lib/api.ts with all API utility functions
+- [x] Connected /campaigns (browse page) to API with mock fallback
+- [x] Connected /campaign/[id] (detail page) to API with mock fallback
+- [x] Connected /recipient/create to API (hospitals dropdown, campaign creation)
+- [x] Connected /hospital (dashboard) to API
+- [x] Connected /admin (dashboard) to API
 
-[] in the create campaign field, there should be a dropdown of all verified hospitals instead of having to pick a name
+## Frontend - Completed
 
-[] add withdrawals to sidebar
+- [x] Add form validation - login form with email/password validation
+- [x] Modify admin approval - detailed modal with campaign details, recipient info, hospital info, documents, AI confidence
+- [x] Refactor responsiveness - added mobile menu to header, fixed icons in layouts, improved login page
 
-[] create a page for editing campaigns
-
-[] make entire page responsive, collapsed sidebar on small screens
-
-# dashboard - hospital
-
-[] make entire page responsive, collapsed sidebar on small screens
-
-[] the hospital is currently lokking fine , but i feel later we might have to add ui for when verification is pending etc
-
-# dashboard - admin
-
-[] mmake entire page responsive, collapsed sidebar on small screens
-
-[] for approvals admin should be able to review campaigns better, the current implementation of review isnt good enough
-
-[] for /recipients, /hospital /campaign, make search feature functional
-
-[] add audit logs to sidebar
+# Completed items removed from previous list

@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { StatsCard } from '@/components/shared/stats-card';
+import { toast } from 'sonner';
 
 interface Withdrawal {
   id: string;
@@ -65,7 +66,7 @@ export default function RecipientWithdrawalsPage() {
   };
 
   const handleRequestWithdrawal = () => {
-    alert(`Withdrawal request for ₦${parseInt(withdrawAmount).toLocaleString()} submitted!`);
+    toast.success(`Withdrawal request for ₦${parseInt(withdrawAmount).toLocaleString()} submitted!`);
     setShowRequestModal(false);
     setWithdrawAmount('');
   };

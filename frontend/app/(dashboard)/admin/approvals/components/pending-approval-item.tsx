@@ -4,15 +4,23 @@ import type { ApprovalItem } from './approval-types';
 
 export function PendingApprovalItem({
   approval,
-  getConfidenceBg,
   getConfidenceColor,
   onReview,
 }: {
   approval: ApprovalItem;
-  getConfidenceBg: (score: number) => string;
   getConfidenceColor: (score: number) => string;
   onReview: () => void;
 }) {
+  const confidenceProgress = `${approval.aiConfidence * 3.6}deg`;
+  const confidenceTone =
+    approval.aiConfidence >= 75 ? 'green' : approval.aiConfidence >= 50 ? 'yellow' : 'red';
+
+  const confidenceRingClasses = {
+    green: 'text-green-600 border-green-100 bg-green-50',
+    yellow: 'text-yellow-600 border-yellow-100 bg-yellow-50',
+    red: 'text-red-600 border-red-100 bg-red-50',
+  }[confidenceTone];
+
   return (
     <div className="border border-border rounded-lg p-5 hover-lint">
       <div className="flex items-start justify-between gap-4 mb-4">
@@ -26,12 +34,23 @@ export function PendingApprovalItem({
             {approval.hospitalVerified && <Badge className="badge-success">Hospital Verified</Badge>}
           </div>
         </div>
-        <div className="text-right">
-          <div className={`p-3 rounded-lg border ${getConfidenceBg(approval.aiConfidence)}`}>
-            <p className="text-xs text-muted-foreground mb-1">AI Confidence</p>
-            <p className={`text-2xl font-bold ${getConfidenceColor(approval.aiConfidence)}`}>
-              {approval.aiConfidence}%
-            </p>
+        <div className="shrink-0 text-right">
+          <div className="flex flex-col items-center gap-2">
+            <div
+              className={`relative h-24 w-24 rounded-full border ${confidenceRingClasses}`}
+              style={{
+                background: `conic-gradient(currentColor 0 ${confidenceProgress}, rgba(148, 163, 184, 0.14) ${confidenceProgress} 360deg)`,
+              }}
+            >
+              <div className="absolute inset-2 rounded-full bg-background border border-border flex items-center justify-center">
+                <div className="text-center">
+                  <p className={`text-2xl font-bold ${getConfidenceColor(approval.aiConfidence)}`}>
+                    {approval.aiConfidence}%
+                  </p>
+                </div>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">AI Confidence</p>
           </div>
         </div>
       </div>

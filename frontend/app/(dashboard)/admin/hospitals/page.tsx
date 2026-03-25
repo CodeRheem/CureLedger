@@ -16,6 +16,12 @@ const mockHospitals = [
 export default function AdminHospitalsPage() {
   const [search, setSearch] = useState('');
 
+  const filteredHospitals = mockHospitals.filter(h => 
+    h.name.toLowerCase().includes(search.toLowerCase()) ||
+    h.license.toLowerCase().includes(search.toLowerCase()) ||
+    h.contact.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <div className="max-w-6xl">
       <div className="mb-8">
@@ -50,7 +56,7 @@ export default function AdminHospitalsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {mockHospitals.map((hospital) => (
+              {filteredHospitals.map((hospital) => (
                 <TableRow key={hospital.id}>
                   <TableCell className="font-medium">{hospital.name}</TableCell>
                   <TableCell>{hospital.license}</TableCell>

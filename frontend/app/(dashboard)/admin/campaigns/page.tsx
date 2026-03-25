@@ -17,6 +17,13 @@ export default function AdminCampaignsPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
+  const filteredCampaigns = mockCampaigns.filter(c => {
+    const matchesSearch = c.title.toLowerCase().includes(search.toLowerCase()) ||
+      c.recipient.toLowerCase().includes(search.toLowerCase());
+    const matchesStatus = !statusFilter || c.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
   return (
     <div className="max-w-6xl">
       <div className="mb-8">
@@ -61,7 +68,7 @@ export default function AdminCampaignsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {mockCampaigns.map((campaign) => (
+              {filteredCampaigns.map((campaign) => (
                 <TableRow key={campaign.id}>
                   <TableCell className="font-medium">{campaign.title}</TableCell>
                   <TableCell>{campaign.recipient}</TableCell>

@@ -16,6 +16,12 @@ const mockRecipients = [
 export default function AdminRecipientsPage() {
   const [search, setSearch] = useState('');
 
+  const filteredRecipients = mockRecipients.filter(r => 
+    r.name.toLowerCase().includes(search.toLowerCase()) ||
+    r.email.toLowerCase().includes(search.toLowerCase()) ||
+    r.phone.includes(search)
+  );
+
   return (
     <div className="max-w-6xl">
       <div className="mb-8">
@@ -50,7 +56,7 @@ export default function AdminRecipientsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {mockRecipients.map((recipient) => (
+              {filteredRecipients.map((recipient) => (
                 <TableRow key={recipient.id}>
                   <TableCell className="font-medium">{recipient.name}</TableCell>
                   <TableCell>{recipient.email}</TableCell>

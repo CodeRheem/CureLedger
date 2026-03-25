@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { StatsCard } from '@/components/shared/stats-card';
 
 interface Withdrawal {
   id: string;
@@ -84,25 +85,10 @@ export default function RecipientWithdrawalsPage() {
         </div>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-4 mb-8">
-        <Card className="border-border">
-          <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground mb-1">Total Withdrawn</p>
-            <p className="text-3xl font-bold text-green-600">₦{totalWithdrawn.toLocaleString()}</p>
-          </CardContent>
-        </Card>
-        <Card className="border-border">
-          <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground mb-1">Pending</p>
-            <p className="text-3xl font-bold text-yellow-600">₦{pendingAmount.toLocaleString()}</p>
-          </CardContent>
-        </Card>
-        <Card className="border-border">
-          <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground mb-1">Available Balance</p>
-            <p className="text-3xl font-bold text-primary">₦1,350,000</p>
-          </CardContent>
-        </Card>
+      <div className="grid gap-4 md:grid-cols-3 mb-8">
+        <StatsCard label="Total Withdrawn" value={`₦${totalWithdrawn.toLocaleString()}`} />
+        <StatsCard label="Pending" value={`₦${pendingAmount.toLocaleString()}`} />
+        <StatsCard label="Available Balance" value="₦1,350,000" />
       </div>
 
       <Card className="border-border">

@@ -28,12 +28,6 @@ const roles = [
     description: 'Verify campaign authenticity',
     icon: Hospital02Icon,
   },
-  {
-    value: 'admin',
-    label: 'Admin',
-    description: 'Manage platform',
-    icon: Settings03Icon,
-  },
 ];
 
 export default function LoginPage() {
@@ -47,28 +41,28 @@ export default function LoginPage() {
 
   const validate = (): boolean => {
     const newErrors: { email?: string; password?: string } = {};
-    
+
     if (!email.trim()) {
       newErrors.email = 'Email is required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       newErrors.email = 'Please enter a valid email address';
     }
-    
+
     if (!password) {
       newErrors.password = 'Password is required';
     } else if (password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validate()) return;
-    
+
     setIsLoading(true);
     setError('');
 
@@ -81,7 +75,6 @@ export default function LoginPage() {
 
       if (role === 'recipient') router.push('/recipient');
       else if (role === 'hospital') router.push('/hospital');
-      else if (role === 'admin') router.push('/admin');
     } catch (err: any) {
       setError(err.message || 'Login failed');
     } finally {

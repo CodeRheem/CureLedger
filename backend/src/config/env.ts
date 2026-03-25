@@ -12,7 +12,8 @@ export interface AppEnv {
   JWT_SECRET: string;
   JWT_EXPIRATION: string;
   INTERSWITCH_BASE_URL: string;
-  INTERSWITCH_API_KEY: string;
+  INTERSWITCH_CLIENT_ID: string;
+  INTERSWITCH_SECRET_KEY: string;
   INTERSWITCH_MERCHANT_CODE: string;
   GMAIL_USER: string;
   GMAIL_APP_PASSWORD: string;
@@ -38,7 +39,8 @@ export function validateEnv(): AppEnv {
   const JWT_SECRET = readEnv('JWT_SECRET');
   const JWT_EXPIRATION = readEnv('JWT_EXPIRATION');
   const INTERSWITCH_BASE_URL = readEnv('INTERSWITCH_BASE_URL');
-  const INTERSWITCH_API_KEY = readEnv('INTERSWITCH_API_KEY');
+  const INTERSWITCH_CLIENT_ID = readEnv('INTERSWITCH_CLIENT_ID');
+  const INTERSWITCH_SECRET_KEY = readEnv('INTERSWITCH_SECRET_KEY');
   const INTERSWITCH_MERCHANT_CODE = readEnv('INTERSWITCH_MERCHANT_CODE');
   const GMAIL_USER = readEnv('GMAIL_USER');
   const GMAIL_APP_PASSWORD = readEnv('GMAIL_APP_PASSWORD') || readEnv('APP_PASSWORD');
@@ -52,7 +54,8 @@ export function validateEnv(): AppEnv {
   if (!JWT_SECRET) missing.push('JWT_SECRET');
   if (!JWT_EXPIRATION) missing.push('JWT_EXPIRATION');
   if (!INTERSWITCH_BASE_URL) missing.push('INTERSWITCH_BASE_URL');
-  if (!INTERSWITCH_API_KEY) missing.push('INTERSWITCH_API_KEY');
+  if (!INTERSWITCH_CLIENT_ID) missing.push('INTERSWITCH_CLIENT_ID');
+  if (!INTERSWITCH_SECRET_KEY) missing.push('INTERSWITCH_SECRET_KEY');
   if (!INTERSWITCH_MERCHANT_CODE) missing.push('INTERSWITCH_MERCHANT_CODE');
   if (!GMAIL_USER) missing.push('GMAIL_USER');
   if (!GMAIL_APP_PASSWORD) missing.push('GMAIL_APP_PASSWORD (or APP_PASSWORD)');
@@ -82,7 +85,8 @@ export function validateEnv(): AppEnv {
     JWT_SECRET,
     JWT_EXPIRATION,
     INTERSWITCH_BASE_URL,
-    INTERSWITCH_API_KEY,
+    INTERSWITCH_CLIENT_ID,
+    INTERSWITCH_SECRET_KEY,
     INTERSWITCH_MERCHANT_CODE,
     GMAIL_USER,
     GMAIL_APP_PASSWORD,

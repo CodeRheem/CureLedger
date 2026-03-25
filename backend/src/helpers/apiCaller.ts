@@ -61,7 +61,7 @@ class ApiService {
     return {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${accessToken}`,
-      'X-Merchant-Code': env.INTERSWITCH_MERCHANT_CODE
+      // 'X-Merchant-Code': env.INTERSWITCH_MERCHANT_CODE
     };
   }
 

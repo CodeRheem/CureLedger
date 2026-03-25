@@ -14,10 +14,10 @@ export interface AppEnv {
   INTERSWITCH_BASE_URL: string;
   INTERSWITCH_CLIENT_ID: string;
   INTERSWITCH_SECRET_KEY: string;
-  INTERSWITCH_MERCHANT_CODE: string;
+  // INTERSWITCH_MERCHANT_CODE: string;
   GMAIL_USER: string;
   GMAIL_APP_PASSWORD: string;
-  EMAIL_FROM: string;
+  // EMAIL_FROM: string;
   LOG_LEVEL: string;
 }
 
@@ -41,10 +41,10 @@ export function validateEnv(): AppEnv {
   const INTERSWITCH_BASE_URL = readEnv('INTERSWITCH_BASE_URL');
   const INTERSWITCH_CLIENT_ID = readEnv('INTERSWITCH_CLIENT_ID');
   const INTERSWITCH_SECRET_KEY = readEnv('INTERSWITCH_SECRET_KEY');
-  const INTERSWITCH_MERCHANT_CODE = readEnv('INTERSWITCH_MERCHANT_CODE');
+  // const INTERSWITCH_MERCHANT_CODE = readEnv('INTERSWITCH_MERCHANT_CODE');
   const GMAIL_USER = readEnv('GMAIL_USER');
   const GMAIL_APP_PASSWORD = readEnv('GMAIL_APP_PASSWORD') || readEnv('APP_PASSWORD');
-  const EMAIL_FROM = readEnv('EMAIL_FROM');
+  // const EMAIL_FROM = readEnv('EMAIL_FROM');
   const LOG_LEVEL = readEnv('LOG_LEVEL');
 
   if (!NODE_ENV) missing.push('NODE_ENV');
@@ -56,10 +56,10 @@ export function validateEnv(): AppEnv {
   if (!INTERSWITCH_BASE_URL) missing.push('INTERSWITCH_BASE_URL');
   if (!INTERSWITCH_CLIENT_ID) missing.push('INTERSWITCH_CLIENT_ID');
   if (!INTERSWITCH_SECRET_KEY) missing.push('INTERSWITCH_SECRET_KEY');
-  if (!INTERSWITCH_MERCHANT_CODE) missing.push('INTERSWITCH_MERCHANT_CODE');
+  // if (!INTERSWITCH_MERCHANT_CODE) missing.push('INTERSWITCH_MERCHANT_CODE');
   if (!GMAIL_USER) missing.push('GMAIL_USER');
   if (!GMAIL_APP_PASSWORD) missing.push('GMAIL_APP_PASSWORD (or APP_PASSWORD)');
-  if (!EMAIL_FROM) missing.push('EMAIL_FROM');
+  // if (!EMAIL_FROM) missing.push('EMAIL_FROM');
   if (!LOG_LEVEL) missing.push('LOG_LEVEL');
 
   const PORT = Number(PORT_RAW);
@@ -87,10 +87,10 @@ export function validateEnv(): AppEnv {
     INTERSWITCH_BASE_URL,
     INTERSWITCH_CLIENT_ID,
     INTERSWITCH_SECRET_KEY,
-    INTERSWITCH_MERCHANT_CODE,
+    // INTERSWITCH_MERCHANT_CODE,
     GMAIL_USER,
     GMAIL_APP_PASSWORD,
-    EMAIL_FROM,
+    // EMAIL_FROM,
     LOG_LEVEL
   };
 }

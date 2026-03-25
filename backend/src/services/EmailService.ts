@@ -26,7 +26,7 @@ export class EmailService {
 
   static async sendMail(payload: SendMailPayload): Promise<void> {
     const transporter = this.createTransporter();
-    const from = payload.from || env.EMAIL_FROM;
+    const from = payload.from || env.GMAIL_USER;
 
     if (!payload.text && !payload.html) {
       throw ApiError.validation('Mail body is required (text or html)');

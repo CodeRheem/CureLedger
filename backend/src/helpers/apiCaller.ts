@@ -1,4 +1,6 @@
-const API_URL = process.env.INTERSWITCH_BASE_URL || 'https://qa.interswitchng.com/collections/api/v1/';
+import { env } from '@config/env';
+
+const API_URL = env.INTERSWITCH_BASE_URL;
 
 type ApiResponse<T> =
   | { success: true; data: T }
@@ -6,13 +8,10 @@ type ApiResponse<T> =
 
 class ApiService {
   private getHeaders(): Record<string, string> {
-    const apiKey = process.env.INTERSWITCH_API_KEY || '';
-    const merchantCode = process.env.INTERSWITCH_MERCHANT_CODE || '';
-
     return {
       'Content-Type': 'application/json',
-      ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
-      ...(merchantCode ? { 'X-Merchant-Code': merchantCode } : {})
+      Authorization: `Bearer ${env.INTERSWITCH_API_KEY}`,
+      'X-Merchant-Code': env.INTERSWITCH_MERCHANT_CODE
     };
   }
 

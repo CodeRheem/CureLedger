@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import { ApiError } from '@core/ApiError';
+import { env } from '@config/env';
 
 interface SendMailPayload {
   to: string | string[];
@@ -14,25 +15,18 @@ interface SendMailPayload {
 
 export class EmailService {
   private static createTransporter() {
-    const user = process.env.GMAIL_USER;
-    const pass = process.env.GMAIL_APP_PASSWORD;
-
-    if (!user || !pass) {
-      throw ApiError.validation('Email service is not configured');
-    }
-
     return nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user,
-        pass
+        user: env.GMAIL_USER,
+        pass: env.GMAIL_APP_PASSWORD
       }
     });
   }
 
   static async sendMail(payload: SendMailPayload): Promise<void> {
     const transporter = this.createTransporter();
-    const from = payload.from || process.env.EMAIL_FROM || process.env.GMAIL_USER || 'no-reply@cureledger.com';
+    const from = payload.from || env.EMAIL_FROM;
 
     if (!payload.text && !payload.html) {
       throw ApiError.validation('Mail body is required (text or html)');

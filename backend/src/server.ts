@@ -1,12 +1,10 @@
 import app from './app';
 import mongoose from 'mongoose';
-
-const PORT = process.env.PORT || 5000;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/cureledger';
+import { env } from '@config/env';
 
 const connectDB = async (): Promise<void> => {
   try {
-    await mongoose.connect(MONGODB_URI, {
+    await mongoose.connect(env.MONGODB_URI, {
       serverSelectionTimeoutMS: 5000,
     });
     console.log('✓ MongoDB connected successfully');
@@ -20,9 +18,9 @@ const startServer = async (): Promise<void> => {
   try {
     await connectDB();
     
-    app.listen(PORT, () => {
-      console.log(`\n✓ Server running on http://localhost:${PORT}`);
-      console.log(`✓ Environment: ${process.env.NODE_ENV || 'development'}\n`);
+    app.listen(env.PORT, () => {
+      console.log(`\n✓ Server running on http://localhost:${env.PORT}`);
+      console.log(`✓ Environment: ${env.NODE_ENV}\n`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);

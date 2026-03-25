@@ -4,6 +4,7 @@ import { RecipientRepo } from '@database/repository/RecipientRepo';
 import { HospitalRepo } from '@database/repository/HospitalRepo';
 import { JWT } from '@core/JWT';
 import { ApiError } from '@core/ApiError';
+import { EmailService } from '@services/EmailService';
 
 interface RegisterRecipientData {
   email: string;
@@ -31,6 +32,18 @@ interface AuthResponse {
 }
 
 export class AuthService {
+  private static generateVerificationCode(): string {
+    return String(Math.floor(100000 + Math.random() * 900000));
+  }
+
+  private static async setupVerificationForUser(userId: string, email: string): Promise<void> {
+    const code = this.generateVerificationCode();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+    await UserRepo.setVerificationCode(userId, code, expiresAt);
+    await EmailService.sendVerificationEmail(email, code);
+  }
+
   static async registerRecipient(data: RegisterRecipientData): Promise<AuthResponse> {
     const existingUser = await UserRepo.findByEmail(data.email);
     if (existingUser) {
@@ -57,6 +70,11 @@ export class AuthService {
       email: user.email,
       roles: [user.role]
     });
+
+    try {
+      await this.setupVerificationForUser(user._id.toString(), user.email);
+    } catch {
+    }
 
     return {
       user: user.toJSON(),
@@ -93,6 +111,11 @@ export class AuthService {
       roles: [user.role]
     });
 
+    try {
+      await this.setupVerificationForUser(user._id.toString(), user.email);
+    } catch {
+    }
+
     return {
       user: user.toJSON(),
       token
@@ -125,6 +148,11 @@ export class AuthService {
       email: user.email,
       roles: [user.role]
     });
+
+    try {
+      await this.setupVerificationForUser(user._id.toString(), user.email);
+    } catch {
+    }
 
     return {
       user: user.toJSON(),
@@ -165,5 +193,45 @@ export class AuthService {
     }
 
     return user.toJSON();
+  }
+
+  static async sendVerificationEmail(email: string): Promise<void> {
+    const user = await UserRepo.findByEmail(email);
+
+    if (!user) {
+      throw ApiError.notFound('User not found');
+    }
+
+    if (user.verified) {
+      throw ApiError.validation('Email already verified');
+    }
+
+    await this.setupVerificationForUser(user._id.toString(), user.email);
+  }
+
+  static async verifyEmail(email: string, code: string): Promise<void> {
+    const user = await UserRepo.findByEmailWithVerification(email);
+
+    if (!user) {
+      throw ApiError.notFound('User not found');
+    }
+
+    if (user.verified) {
+      return;
+    }
+
+    if (!user.emailVerificationCode || !user.emailVerificationExpiresAt) {
+      throw ApiError.validation('No verification request found');
+    }
+
+    if (user.emailVerificationCode !== code) {
+      throw ApiError.validation('Invalid verification code');
+    }
+
+    if (new Date(user.emailVerificationExpiresAt).getTime() < Date.now()) {
+      throw ApiError.validation('Verification code expired');
+    }
+
+    await UserRepo.markEmailVerified(user._id);
   }
 }

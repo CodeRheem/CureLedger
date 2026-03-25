@@ -41,6 +41,19 @@ const loginSchema = Joi.object({
   })
 });
 
+const sendVerificationSchema = Joi.object({
+  body: Joi.object({
+    email: Joi.string().email().required()
+  })
+});
+
+const verifyEmailSchema = Joi.object({
+  body: Joi.object({
+    email: Joi.string().email().required(),
+    code: Joi.string().length(6).required()
+  })
+});
+
 // POST /auth/register-recipient
 router.post(
   '/register-recipient',
@@ -89,6 +102,42 @@ router.post(
     } catch (error) {
       if (error instanceof ApiError) {
         res.status(401).json(error.toResponse());
+      } else {
+        throw error;
+      }
+    }
+  })
+);
+
+// POST /auth/send-verification-email
+router.post(
+  '/send-verification-email',
+  validateRequest(sendVerificationSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    try {
+      await AuthService.sendVerificationEmail(req.body.email);
+      ApiResponse.ok(res, 'Verification email sent', { sent: true });
+    } catch (error) {
+      if (error instanceof ApiError) {
+        res.status(error.getHttpStatus()).json(error.toResponse());
+      } else {
+        throw error;
+      }
+    }
+  })
+);
+
+// POST /auth/verify-email
+router.post(
+  '/verify-email',
+  validateRequest(verifyEmailSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    try {
+      await AuthService.verifyEmail(req.body.email, req.body.code);
+      ApiResponse.ok(res, 'Email verified successfully', { verified: true });
+    } catch (error) {
+      if (error instanceof ApiError) {
+        res.status(error.getHttpStatus()).json(error.toResponse());
       } else {
         throw error;
       }

@@ -27,6 +27,12 @@ export class UserRepo {
     return UserModel.findOne({ email: email.toLowerCase() }).select('+password') as any;
   }
 
+  static async findByEmailWithVerification(email: string): Promise<IUser | null> {
+    return UserModel.findOne({ email: email.toLowerCase() }).select(
+      '+emailVerificationCode +emailVerificationExpiresAt'
+    ) as any;
+  }
+
   static async findByRole(role: UserRole): Promise<IUser[]> {
     return UserModel.find({ role });
   }
@@ -48,5 +54,33 @@ export class UserRepo {
   static async delete(id: string | Types.ObjectId): Promise<boolean> {
     const result = await UserModel.findByIdAndDelete(id);
     return result !== null;
+  }
+
+  static async setVerificationCode(
+    userId: string | Types.ObjectId,
+    code: string,
+    expiresAt: Date
+  ): Promise<IUser | null> {
+    return UserModel.findByIdAndUpdate(
+      userId,
+      {
+        emailVerificationCode: code,
+        emailVerificationExpiresAt: expiresAt
+      },
+      { new: true }
+    ).select('+emailVerificationCode +emailVerificationExpiresAt') as any;
+  }
+
+  static async markEmailVerified(userId: string | Types.ObjectId): Promise<IUser | null> {
+    return UserModel.findByIdAndUpdate(
+      userId,
+      {
+        verified: true,
+        emailVerifiedAt: new Date(),
+        emailVerificationCode: null,
+        emailVerificationExpiresAt: null
+      },
+      { new: true }
+    );
   }
 }

@@ -2,10 +2,7 @@ import express, { Express, Request, Response, NextFunction } from 'express';
 import routes from './routes';
 import cors from 'cors';
 import helmet from 'helmet';
-import dotenv from 'dotenv';
 import { ApiError } from '@core/ApiError';
-
-dotenv.config();
 
 const app: Express = express();
 

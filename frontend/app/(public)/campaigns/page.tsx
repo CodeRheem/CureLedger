@@ -79,7 +79,7 @@ export default function BrowseCampaigns() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="py-16 bg-gradient-to-br from-red-50 via-white to-red-50/30 border-b border-red-100">
+      <section className="py-16 bg-linear-to-br from-red-50 via-white to-red-50/30 border-b border-red-100">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground mb-4">

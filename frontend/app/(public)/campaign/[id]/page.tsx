@@ -81,7 +81,7 @@ export default function CampaignDetail() {
       {/* Breadcrumb */}
       <div className="border-b border-border bg-white">
         <div className="container mx-auto px-4 py-4">
-          <Link href="/campaigns" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition">
+          <Link href="/campaignssupports-backdrop-filter:bg-white/60" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition">
             <HugeiconsIcon icon={ArrowLeft02Icon} className="w-4 h-4" strokeWidth={1.5} />
             Back to Campaigns
           </Link>
@@ -192,7 +192,7 @@ export default function CampaignDetail() {
                 <CardContent>
                   <div className="space-y-3">
                     {campaign.documents && campaign.documents.length > 0 ? (
-                      campaign.documents.map((doc, idx) => (
+                      campaign.documents.map((doc: { name: string; type: string }, idx: number) => (
                         <div key={idx} className="flex items-center justify-between p-4 border border-border rounded-lg hover:border-red-300 hover:bg-red-50/50 transition">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center">

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { HugeiconsIcon } from '@hugeicons/react';
@@ -10,15 +10,48 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { mockCampaigns } from '@/lib/mock-data';
+import { api } from '@/lib/api';
 
 export default function CampaignDetail() {
   const params = useParams();
   const campaignId = params.id as string;
-  const campaign = mockCampaigns.find((c) => c.id === campaignId);
+  const [campaign, setCampaign] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [donationAmount, setDonationAmount] = useState('');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentStep, setPaymentStep] = useState<'form' | 'processing' | 'success'>('form');
   const [cardDetails, setCardDetails] = useState({ number: '', expiry: '', cvv: '', name: '' });
+
+  useEffect(() => {
+    async function fetchCampaign() {
+      try {
+        const data = await api.getCampaign(campaignId);
+        setCampaign(data);
+      } catch (err) {
+        console.error('Failed to fetch campaign:', err);
+        setError('Failed to load campaign');
+        const fallback = mockCampaigns.find((c) => c.id === campaignId);
+        setCampaign(fallback || null);
+      } finally {
+        setLoading(false);
+      }
+    }
+    if (campaignId) {
+      fetchCampaign();
+    }
+  }, [campaignId]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="animate-pulse text-center">
+          <div className="w-12 h-12 mx-auto mb-4 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-muted-foreground">Loading campaign...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!campaign) {
     return (

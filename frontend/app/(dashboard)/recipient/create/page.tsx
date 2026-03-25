@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { CheckmarkCircle02Icon, FileUploadIcon, AlertIcon } from '@hugeicons/core-free-icons';
@@ -9,13 +9,14 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { mockHospitals } from '@/lib/mock-data';
+import { api } from '@/lib/api';
 
-const verifiedHospitals = mockHospitals.map(h => ({
-  id: h.id,
-  name: h.hospitalName,
-  license: h.hospitalLicense,
-  address: h.address,
-}));
+interface Hospital {
+  id: string;
+  name: string;
+  license?: string;
+  address?: string;
+}
 
 export default function CreateCampaignPage() {
   const router = useRouter();
@@ -23,6 +24,8 @@ export default function CreateCampaignPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [hospitals, setHospitals] = useState<Hospital[]>([]);
+  const [loadingHospitals, setLoadingHospitals] = useState(true);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -32,6 +35,35 @@ export default function CreateCampaignPage() {
     deadline: '',
     documents: [] as File[],
   });
+
+  useEffect(() => {
+    async function fetchHospitals() {
+      try {
+        const data = await api.getHospitals();
+        setHospitals(
+          (data.hospitals || []).map((h: any) => ({
+            id: h._id || h.id,
+            name: h.hospitalName,
+            license: h.hospitalLicense,
+            address: h.address,
+          }))
+        );
+      } catch (err) {
+        console.error('Failed to fetch hospitals:', err);
+        setHospitals(
+          mockHospitals.map((h) => ({
+            id: h.id,
+            name: h.hospitalName,
+            license: h.hospitalLicense,
+            address: h.address,
+          }))
+        );
+      } finally {
+        setLoadingHospitals(false);
+      }
+    }
+    fetchHospitals();
+  }, []);
 
   const profileComplete = true;
   const missingFields: string[] = [];
@@ -58,22 +90,22 @@ export default function CreateCampaignPage() {
     if (currentStep === 1) {
       if (!formData.title.trim()) {
         newErrors.title = 'Campaign title is required';
-      } else if (formData.title.length < 10) {
-        newErrors.title = 'Title must be at least 10 characters';
+      } else if (formData.title.length < 5) {
+        newErrors.title = 'Title must be at least 5 characters';
       }
       if (!formData.description.trim()) {
         newErrors.description = 'Description is required';
-      } else if (formData.description.length < 50) {
-        newErrors.description = 'Description must be at least 50 characters';
+      } else if (formData.description.length < 20) {
+        newErrors.description = 'Description must be at least 20 characters';
       }
       if (!formData.medicalNeed.trim()) {
-        newErrors.medicalNeed = 'Medical need is required';
+        newErrors.medicalNeed = 'Medical condition is required';
       }
     }
 
     if (currentStep === 2) {
-      if (!formData.hospital.trim()) {
-        newErrors.hospital = 'Hospital name is required';
+      if (!formData.hospital) {
+        newErrors.hospital = 'Please select a verified hospital';
       }
       if (!formData.targetAmount) {
         newErrors.targetAmount = 'Target amount is required';
@@ -108,14 +140,19 @@ export default function CreateCampaignPage() {
     setIsLoading(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      console.log('Campaign data submitted:', formData);
+      await api.createCampaign({
+        title: formData.title,
+        description: formData.description,
+        condition: formData.medicalNeed,
+        hospitalId: formData.hospital,
+        targetAmount: Number(formData.targetAmount),
+        endsAt: formData.deadline,
+      });
 
       setIsSuccess(true);
 
       setTimeout(() => {
-        router.push('/recipient/campaigns');
+        router.push('/recipient/campaign');
       }, 2000);
     } catch (error) {
       console.error('Error creating campaign:', error);
@@ -275,11 +312,15 @@ export default function CreateCampaignPage() {
                     required
                   >
                     <option value="">Select a verified hospital</option>
-                    {verifiedHospitals.map(h => (
-                      <option key={h.id} value={h.name}>
-                        {h.name} - {h.address}
-                      </option>
-                    ))}
+                    {loadingHospitals ? (
+                      <option disabled>Loading hospitals...</option>
+                    ) : (
+                      hospitals.map((h) => (
+                        <option key={h.id} value={h.id}>
+                          {h.name} - {h.address}
+                        </option>
+                      ))
+                    )}
                   </select>
                   {errors.hospital && <p className="text-sm text-red-500">{errors.hospital}</p>}
                   <p className="text-xs text-muted-foreground">Only verified hospitals are shown</p>

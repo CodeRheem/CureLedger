@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { Search01Icon } from '@hugeicons/core-free-icons';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { mockCampaigns } from '@/lib/mock-data';
+import { api } from '@/lib/api';
 
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&h=600&fit=crop';
 
@@ -20,19 +21,38 @@ const statusFilters = [
 export default function BrowseCampaigns() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('verified');
+  const [campaigns, setCampaigns] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchCampaigns() {
+      try {
+        const data = await api.getCampaigns();
+        setCampaigns(data.campaigns || []);
+      } catch (err) {
+        console.error('Failed to fetch campaigns:', err);
+        setError('Failed to load campaigns');
+        setCampaigns(mockCampaigns);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchCampaigns();
+  }, []);
 
   const filtered = useMemo(() => {
-    return mockCampaigns.filter((campaign) => {
+    return campaigns.filter((campaign) => {
       const matchesSearch =
-        campaign.title.toLowerCase().includes(search.toLowerCase()) ||
-        campaign.description.toLowerCase().includes(search.toLowerCase());
+        campaign.title?.toLowerCase().includes(search.toLowerCase()) ||
+        campaign.description?.toLowerCase().includes(search.toLowerCase());
 
       const isVerified = campaign.status === 'approved';
       const matchesStatus = statusFilter === 'all' || (statusFilter === 'verified' && isVerified);
 
       return matchesSearch && matchesStatus && isVerified;
     });
-  }, [search, statusFilter]);
+  }, [search, statusFilter, campaigns]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -111,7 +131,20 @@ export default function BrowseCampaigns() {
       {/* Campaigns Grid */}
       <section className="py-12">
         <div className="container mx-auto px-4">
-          {filtered.length === 0 ? (
+          {loading ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="bg-white rounded-lg border border-border animate-pulse">
+                  <div className="h-40 bg-gray-200 rounded-t-lg" />
+                  <div className="p-4 space-y-3">
+                    <div className="h-4 bg-gray-200 rounded w-3/4" />
+                    <div className="h-3 bg-gray-200 rounded w-1/2" />
+                    <div className="h-2 bg-gray-200 rounded w-full mt-4" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : filtered.length === 0 ? (
             <div className="text-center py-20">
               <div className="w-16 h-16 mx-auto mb-4 rounded-full empty-state-bg flex items-center justify-center">
                 <HugeiconsIcon icon={Search01Icon} className="w-8 h-8 empty-state-icon" strokeWidth={1.5} />

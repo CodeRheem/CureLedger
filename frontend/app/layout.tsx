@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Montserrat } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import { ToastProvider } from "@/components/shared/toast";
-
+import { Toaster } from "sonner";
 const montserrat = Montserrat({
   subsets: ['latin'],
   variable: '--font-montserrat',
@@ -32,9 +31,8 @@ export default function RootLayout({
       className={cn("h-full", "antialiased", montserrat.variable, inter.variable, "font-sans")}
     >
       <body className="min-h-full flex flex-col bg-background">
-        <ToastProvider>
-          {children}
-        </ToastProvider>
+        <Toaster position="top-right"/>
+        {children}
       </body>
     </html>
   );

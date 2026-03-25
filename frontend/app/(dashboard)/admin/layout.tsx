@@ -15,8 +15,10 @@ import {
   UserCircleIcon,
   CheckmarkCircle02Icon,
   ClockIcon,
-  Menu01Icon,
+  MenuSquareIcon,
+  CancelCircleIcon,
   Cancel01Icon,
+  Menu01Icon,
 } from '@hugeicons/core-free-icons';
 import { logout } from '@/lib/auth';
 
@@ -84,14 +86,14 @@ export default function AdminLayout({
         onClick={() => setIsCollapsed(!isCollapsed)}
         className="block lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-primary text-white"
       >
-        <HugeiconsIcon icon={isCollapsed ? Menu01Icon : Cancel01Icon} className="size-16 text-white" strokeWidth={1.5} />
+        <HugeiconsIcon icon={isCollapsed ? MenuSquareIcon : CancelCircleIcon} size={55} />
       </button>
 
       {/* Sidebar */}
       <aside className={`
         fixed lg:static inset-y-0 left-0 z-40 
         bg-primary text-white flex flex-col transition-all duration-300
-        ${isCollapsed ? '-translate-x-full lg:w-16 lg:translate-x-0' : 'w-64'}
+        ${isCollapsed ? '-translate-x-full lg:w-24 lg:translate-x-0' : 'w-64'}
         ${isCollapsed ? 'lg:translate-x-0' : ''}
       `}>
         {/* Logo */}
@@ -117,14 +119,14 @@ export default function AdminLayout({
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-3 lg:px-4 py-3 rounded-lg transition ${isActive
+                className={`flex ${isCollapsed ? 'w-fit' : 'w-full'} items-center gap-3 px-3 lg:px-4 py-3 rounded-lg transition ${isActive
                   ? 'bg-white/20 font-semibold'
                   : 'hover:bg-white/10 text-white/90'
                   }`}
                 onClick={() => setIsCollapsed(false)}
               >
                 <span className="shrink-0">{item.icon}</span>
-                <span className={`transition-opacity ${isCollapsed ? 'lg:hidden' : ''}`}>
+                <span className={`transition-opacity ${isCollapsed ? 'md:hidden' : ''}`}>
                   {item.label}
                 </span>
               </Link>
@@ -137,9 +139,9 @@ export default function AdminLayout({
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="hidden lg:flex p-4 border-t border-primary/20 items-center justify-center hover:bg-white/10"
         >
-          <HugeiconsIcon icon={isCollapsed ? Menu01Icon : Cancel01Icon} className="size-6 text-white" strokeWidth={1.5} />
+          <HugeiconsIcon icon={isCollapsed ? Menu01Icon : Cancel01Icon} className="text-white" size={16} />
 
-          <span className={`text-sm text-white/70 transition-opacity ${isCollapsed ? 'opacity-0' : ''}`}>
+          <span className={`text-sm text-white/70 transition-opacity ${isCollapsed ? 'hidden' : ''}`}>
             Collapse
           </span>
         </button>

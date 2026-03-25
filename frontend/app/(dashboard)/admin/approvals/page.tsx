@@ -145,10 +145,83 @@ export default function AdminApprovalsPage() {
       )}
 
       {showModal && selectedApproval && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4">
-            <h3 className="font-heading text-xl font-bold mb-4">Review Campaign</h3>
-            <div className="space-y-4 mb-6">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+            {/* Header */}
+            <div className="p-6 border-b border-border">
+              <h3 className="font-heading text-xl font-bold">Campaign Review</h3>
+              <p className="text-sm text-muted-foreground mt-1">Review all details before approving</p>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              {/* Campaign Summary */}
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide">Campaign Title</p>
+                  <p className="font-semibold mt-1">{selectedApproval.title}</p>
+                </div>
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide">Target Amount</p>
+                  <p className="font-semibold mt-1">₦{selectedApproval.targetAmount.toLocaleString()}</p>
+                </div>
+              </div>
+
+              {/* Recipient Info */}
+              <div className="border border-border rounded-lg p-4">
+                <h4 className="font-semibold text-sm mb-3">Recipient Information</h4>
+                <div className="grid md:grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <p className="text-muted-foreground">Name</p>
+                    <p className="font-medium">{selectedApproval.recipientName}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Contact</p>
+                    <p className="font-medium">+234 800 000 0000</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Email</p>
+                    <p className="font-medium">recipient@email.com</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Location</p>
+                    <p className="font-medium">Lagos, Nigeria</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Hospital Info */}
+              <div className="border border-border rounded-lg p-4">
+                <h4 className="font-semibold text-sm mb-3">Hospital Information</h4>
+                <div className="grid md:grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <p className="text-muted-foreground">Hospital Name</p>
+                    <p className="font-medium">{selectedApproval.hospitalName}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Verification Status</p>
+                    <Badge className="mt-1 bg-green-100 text-green-700">Verified</Badge>
+                  </div>
+                </div>
+              </div>
+
+              {/* Documents */}
+              <div className="border border-border rounded-lg p-4">
+                <h4 className="font-semibold text-sm mb-3">Submitted Documents</h4>
+                <div className="space-y-2">
+                  {['Medical Report.pdf', 'Prescription.pdf', 'Hospital Letter.pdf'].map((doc, i) => (
+                    <div key={i} className="flex items-center justify-between p-2 bg-gray-50 rounded text-sm">
+                      <span className="flex items-center gap-2">
+                        <HugeiconsIcon icon={CheckmarkCircle02Icon} className="w-4 h-4 text-muted-foreground" />
+                        {doc}
+                      </span>
+                      <Button variant="ghost" size="sm">View</Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* AI Confidence */}
               <div className={`p-4 rounded-lg border ${getConfidenceBg(selectedApproval.aiConfidence)}`}>
                 <div className="flex justify-between items-center">
                   <div>
@@ -164,6 +237,7 @@ export default function AdminApprovalsPage() {
                   </p>
                 </div>
               </div>
+
               {selectedApproval.aiConfidence < 95 && (
                 <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                   <p className="text-sm text-yellow-800">
@@ -172,23 +246,31 @@ export default function AdminApprovalsPage() {
                   </p>
                 </div>
               )}
+
+              {/* Notes */}
               <div>
-                <label className="text-sm font-medium text-foreground mb-2 block">Override Reason (if approving below threshold)</label>
+                <label className="text-sm font-medium text-foreground mb-2 block">
+                  {selectedApproval.aiConfidence < 95 ? 'Override Reason' : 'Notes (optional)'}
+                </label>
                 <textarea
                   className="w-full p-3 border border-input rounded-lg text-sm"
                   rows={3}
-                  placeholder="Explain why you are overriding the AI recommendation..."
+                  placeholder={selectedApproval.aiConfidence < 95 
+                    ? "Explain why you are overriding the AI recommendation..." 
+                    : "Add any notes about this decision..."}
                   value={overrideReason}
                   onChange={(e) => setOverrideReason(e.target.value)}
                 />
               </div>
             </div>
-            <div className="flex gap-3">
+
+            {/* Footer */}
+            <div className="p-6 border-t border-border flex gap-3">
               <Button
                 onClick={() => handleApproval(selectedApproval.id, 'approve', selectedApproval.aiConfidence < 95)}
                 className="flex-1 bg-green-600 hover:bg-green-700"
               >
-                Approve
+                Approve Campaign
               </Button>
               <Button
                 variant="outline"

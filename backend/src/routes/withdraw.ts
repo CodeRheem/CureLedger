@@ -29,6 +29,41 @@ const approveSchema = Joi.object({
   })
 });
 
+// TODO: Review - NEW ENDPOINT ADDED
+// GET / - List recipient's withdrawals
+// router.get(
+//   '/',
+//   authenticate,
+//   authorize(UserRole.RECIPIENT),
+//   asyncHandler(async (req: Request, res: Response) => {
+//     try {
+//       if (!req.user) {
+//         throw ApiError.unauthorized();
+//       }
+
+//       const page = parseInt(req.query.page as string) || 1;
+//       const limit = parseInt(req.query.limit as string) || 20;
+
+//       const { campaigns } = await CampaignRepo.findByRecipientId(req.user.userId, 1, 100);
+
+//       if (campaigns.length === 0) {
+//         return ApiResponse.ok(res, 'No campaigns found', { withdrawals: [], total: 0 });
+//       }
+
+//       const campaignIds = campaigns.map(c => c._id);
+//       const { withdrawals, total } = await WithdrawalRepo.findByCampaignIds(campaignIds, page, limit);
+
+//       ApiResponse.ok(res, 'Withdrawals retrieved', { withdrawals, total });
+//     } catch (error) {
+//       if (error instanceof ApiError) {
+//         res.status(error.getHttpStatus()).json(error.toResponse());
+//       } else {
+//         throw error;
+//       }
+//     }
+//   })
+// );
+
 // POST / - Request withdrawal (Recipient)
 router.post(
   '/',

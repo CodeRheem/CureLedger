@@ -57,6 +57,18 @@ export class CampaignService {
     return CampaignRepo.findByStatus(CampaignStatus.APPROVED, page, limit);
   }
 
+  // TODO: Review - ADDED hospitalId PARAMETER
+  // static async getPendingCampaigns(
+  //   status: CampaignStatus,
+  //   page: number = 1,
+  //   limit: number = 20,
+  //   hospitalId?: string
+  // ) {
+  //   if (![CampaignStatus.PENDING_HOSPITAL, CampaignStatus.PENDING_ADMIN].includes(status)) {
+  //     throw ApiError.validation('Invalid pending status');
+  //   }
+  //   return CampaignRepo.findByStatusAndHospital(status, page, limit, hospitalId);
+  // }
   static async getPendingCampaigns(
     status: CampaignStatus,
     page: number = 1,

@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { mockCampaigns } from '@/lib/mock-data';
+import { toast } from 'sonner';
 
 export default function RecipientCampaignPage() {
   const router = useRouter();
@@ -212,7 +213,7 @@ export default function RecipientCampaignPage() {
               </div>
               <div className="flex gap-2">
                 <Button onClick={() => {
-                  alert('Campaign updated successfully!');
+                  toast.success('Campaign updated successfully!');
                   setIsEditing(false);
                 }}>Save Changes</Button>
                 <Button variant="outline" onClick={() => setIsEditing(false)}>Cancel</Button>

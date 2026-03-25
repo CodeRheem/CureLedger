@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { ArrowRight02Icon } from '@hugeicons/core-free-icons';
 import { Button } from '@/components/ui/button';
@@ -8,9 +9,37 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { mockCampaigns } from '@/lib/mock-data';
 import { StatsCard } from '@/components/shared/stats-card';
+import { api } from '@/lib/api';
 
 export default function AdminDashboardPage() {
-  const pendingCampaigns = mockCampaigns.filter(c => c.status === 'pending_admin');
+  const [stats, setStats] = useState<any>(null);
+  const [pendingCampaigns, setPendingCampaigns] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [statsData, campaignsData] = await Promise.all([
+          api.getAdminStats(),
+          api.getPendingCampaigns('pending_admin')
+        ]);
+        setStats(statsData);
+        setPendingCampaigns(campaignsData.campaigns || []);
+      } catch (err) {
+        console.error('Failed to fetch admin data:', err);
+        setPendingCampaigns(mockCampaigns.filter(c => c.status === 'pending_admin'));
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
+
+  const formatCurrency = (amount: number) => {
+    if (amount >= 1000000) return `₦${(amount / 1000000).toFixed(1)}M`;
+    if (amount >= 1000) return `₦${(amount / 1000).toFixed(0)}K`;
+    return `₦${amount}`;
+  };
 
   return (
     <div className="max-w-6xl">
@@ -22,10 +51,21 @@ export default function AdminDashboardPage() {
 
       {/* Stats Grid */}
       <div className="grid md:grid-cols-4 gap-4 mb-8">
-        <StatsCard label="Total Campaigns" value="45" />
-        <StatsCard label="Approved" value="38" />
-        <StatsCard label="Pending" value="5" />
-        <StatsCard label="Total Raised" value="₦125M" />
+        {loading ? (
+          <>
+            <div className="bg-white rounded-lg border border-border p-4 animate-pulse"><div className="h-4 bg-gray-200 rounded w-20 mb-2" /><div className="h-8 bg-gray-200 rounded w-16" /></div>
+            <div className="bg-white rounded-lg border border-border p-4 animate-pulse"><div className="h-4 bg-gray-200 rounded w-20 mb-2" /><div className="h-8 bg-gray-200 rounded w-16" /></div>
+            <div className="bg-white rounded-lg border border-border p-4 animate-pulse"><div className="h-4 bg-gray-200 rounded w-20 mb-2" /><div className="h-8 bg-gray-200 rounded w-16" /></div>
+            <div className="bg-white rounded-lg border border-border p-4 animate-pulse"><div className="h-4 bg-gray-200 rounded w-20 mb-2" /><div className="h-8 bg-gray-200 rounded w-16" /></div>
+          </>
+        ) : (
+          <>
+            <StatsCard label="Total Campaigns" value={stats?.campaigns?.total || 0} />
+            <StatsCard label="Approved" value={stats?.campaigns?.approved || 0} />
+            <StatsCard label="Pending" value={stats?.campaigns?.pending || 0} />
+            <StatsCard label="Total Raised" value={formatCurrency(stats?.donations?.totalRaised || 0)} />
+          </>
+        )}
       </div>
 
       {/* Quick Actions */}

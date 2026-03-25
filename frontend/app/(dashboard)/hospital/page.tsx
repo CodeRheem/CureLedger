@@ -1,6 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { CheckmarkCircle02Icon } from '@hugeicons/core-free-icons';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -20,9 +22,9 @@ export default function HospitalDashboardPage() {
 
       {/* Stats Grid */}
       <div className="grid md:grid-cols-3 gap-4 mb-8">
-        <StatsCard label="Pending Verifications" value={pendingCampaigns.length} variant="yellow" />
-        <StatsCard label="Verified Patients" value="12" variant="green" />
-        <StatsCard label="Verified Campaigns" value="12" variant="blue" />
+        <StatsCard label="Pending Verifications" value={pendingCampaigns.length} />
+        <StatsCard label="Verified Patients" value="12" />
+        <StatsCard label="Verified Campaigns" value="12" />
       </div>
 
       {/* Pending Verifications */}
@@ -56,9 +58,7 @@ export default function HospitalDashboardPage() {
           ) : (
             <div className="text-center py-12">
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-50 flex items-center justify-center">
-                <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                </svg>
+                <HugeiconsIcon icon={CheckmarkCircle02Icon} className="w-8 h-8 text-green-600" strokeWidth={1.5} />
               </div>
               <p className="text-muted-foreground">No pending verifications</p>
             </div>

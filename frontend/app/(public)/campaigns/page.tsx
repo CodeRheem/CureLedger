@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 import { useState, useMemo } from 'react';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Search01Icon } from '@hugeicons/core-free-icons';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,10 +26,10 @@ export default function BrowseCampaigns() {
       const matchesSearch =
         campaign.title.toLowerCase().includes(search.toLowerCase()) ||
         campaign.description.toLowerCase().includes(search.toLowerCase());
-      
+
       const isVerified = campaign.status === 'approved';
       const matchesStatus = statusFilter === 'all' || (statusFilter === 'verified' && isVerified);
-      
+
       return matchesSearch && matchesStatus && isVerified;
     });
   }, [search, statusFilter]);
@@ -66,12 +68,10 @@ export default function BrowseCampaigns() {
             <p className="text-lg text-muted-foreground mb-8">
               Explore verified campaigns and make a difference in someone&apos;s life
             </p>
-            
+
             {/* Search Bar */}
             <div className="relative max-w-xl mx-auto">
-              <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.196 10.196Z" />
-              </svg>
+              <HugeiconsIcon icon={Search01Icon} className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" strokeWidth={1.5} />
               <Input
                 placeholder="Search for campaigns, conditions, or recipients..."
                 value={search}
@@ -114,9 +114,7 @@ export default function BrowseCampaigns() {
           {filtered.length === 0 ? (
             <div className="text-center py-20">
               <div className="w-16 h-16 mx-auto mb-4 rounded-full empty-state-bg flex items-center justify-center">
-                <svg className="w-8 h-8 empty-state-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.196 10.196Z" />
-                </svg>
+                <HugeiconsIcon icon={Search01Icon} className="w-8 h-8 empty-state-icon" strokeWidth={1.5} />
               </div>
               <h3 className="text-lg font-semibold text-foreground mb-2">No campaigns found</h3>
               <p className="text-muted-foreground mb-6">Check back later for new verified campaigns</p>
@@ -129,14 +127,14 @@ export default function BrowseCampaigns() {
               {filtered.map((campaign) => {
                 const progress = getProgressPercentage(campaign);
                 const raised = campaign.amountRaised || campaign.raisedAmount || 0;
-                
+
                 return (
                   <Link key={campaign.id} href={`/campaign/${campaign.id}`}>
                     <Card className="h-full border-border hover-lint hover:shadow-lg transition-all duration-300 group cursor-pointer">
                       {/* Campaign Image */}
                       <div className="relative h-40 overflow-hidden rounded-t-lg">
-                        <img 
-                          src={getCampaignImage(campaign)} 
+                        <img
+                          src={getCampaignImage(campaign)}
                           alt={campaign.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           onError={(e) => {

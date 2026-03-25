@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { ArrowLeft02Icon, CheckmarkCircle02Icon, DocumentAttachmentIcon, MoneyAdd01Icon, OctagonXIcon, Search01Icon, SecurityCheckIcon } from '@hugeicons/core-free-icons';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,11 +23,9 @@ export default function CampaignDetail() {
   if (!campaign) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
-          <div className="text-center">
+        <div className="text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-full empty-state-bg flex items-center justify-center">
-            <svg className="w-8 h-8 empty-state-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.196 10.196Z" />
-            </svg>
+            <HugeiconsIcon icon={Search01Icon} className="w-8 h-8 empty-state-icon" strokeWidth={1.5} />
           </div>
           <h1 className="text-2xl font-heading font-bold mb-4">Campaign Not Found</h1>
           <Link href="/campaigns">
@@ -49,24 +49,22 @@ export default function CampaignDetail() {
       <div className="border-b border-border bg-white">
         <div className="container mx-auto px-4 py-4">
           <Link href="/campaigns" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
-            </svg>
+            <HugeiconsIcon icon={ArrowLeft02Icon} className="w-4 h-4" strokeWidth={1.5} />
             Back to Campaigns
           </Link>
         </div>
       </div>
 
       {/* Hero */}
-      <section className="py-8 bg-gradient-to-br from-red-50 via-white to-red-50/30">
+      <section className="py-8 bg-linear-to-br from-red-50 via-white to-red-50/30">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-3 gap-8">
             {/* Main Info */}
             <div className="md:col-span-2 space-y-6">
               {/* Image */}
               <div className="relative h-64 md:h-80 rounded-xl overflow-hidden">
-                <img 
-                  src={campaign.images?.[0] || 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800'} 
+                <img
+                  src={campaign.images?.[0] || 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800'}
                   alt={campaign.title}
                   className="w-full h-full object-cover"
                 />
@@ -125,9 +123,7 @@ export default function CampaignDetail() {
                   <div className="flex items-center justify-between p-4 info-box">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
-                        <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.196 10.196Z" />
-                        </svg>
+                        <HugeiconsIcon icon={SecurityCheckIcon} className="w-5 h-5 text-primary" strokeWidth={1.5} />
                       </div>
                       <div>
                         <p className="font-medium text-foreground">Hospital Verification</p>
@@ -141,9 +137,7 @@ export default function CampaignDetail() {
                   <div className="flex items-center justify-between p-4 info-box">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
-                        <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                        </svg>
+                        <HugeiconsIcon icon={CheckmarkCircle02Icon} className="w-5 h-5 text-primary" strokeWidth={1.5} />
                       </div>
                       <div>
                         <p className="font-medium text-foreground">Admin Approval</p>
@@ -169,9 +163,7 @@ export default function CampaignDetail() {
                         <div key={idx} className="flex items-center justify-between p-4 border border-border rounded-lg hover:border-red-300 hover:bg-red-50/50 transition">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center">
-                              <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                              </svg>
+                              <HugeiconsIcon icon={DocumentAttachmentIcon} className="w-5 h-5 text-primary" strokeWidth={1.5} />
                             </div>
                             <div>
                               <p className="font-medium text-foreground">{doc.name}</p>
@@ -236,7 +228,7 @@ export default function CampaignDetail() {
                         onChange={(e) => setDonationAmount(e.target.value)}
                         className="h-12 text-center"
                       />
-                      <Button 
+                      <Button
                         className="w-full h-12 text-base font-medium"
                         onClick={() => setShowPaymentModal(true)}
                         disabled={!donationAmount || parseInt(donationAmount) <= 0}
@@ -251,9 +243,7 @@ export default function CampaignDetail() {
                   )}
 
                   <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1">
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0 0 12 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75Z" />
-                    </svg>
+                    <HugeiconsIcon icon={SecurityCheckIcon} className="w-3 h-3" strokeWidth={1.5} />
                     Secure payment via Interswitch
                   </p>
                 </CardContent>
@@ -273,9 +263,7 @@ export default function CampaignDetail() {
                   <div className="flex items-center justify-between">
                     <h3 className="font-heading text-xl font-bold">Payment Details</h3>
                     <button onClick={() => setShowPaymentModal(false)} className="text-muted-foreground hover:text-foreground">
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                      </svg>
+                      <HugeiconsIcon icon={OctagonXIcon} className="w-5 h-5" strokeWidth={1.5} />
                     </button>
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">Donating ₦{parseInt(donationAmount).toLocaleString()} to {campaign?.title}</p>
@@ -286,7 +274,7 @@ export default function CampaignDetail() {
                     <Input
                       placeholder="1234 5678 9012 3456"
                       value={cardDetails.number}
-                      onChange={(e) => setCardDetails({...cardDetails, number: e.target.value})}
+                      onChange={(e) => setCardDetails({ ...cardDetails, number: e.target.value })}
                     />
                   </div>
                   <div>
@@ -294,7 +282,7 @@ export default function CampaignDetail() {
                     <Input
                       placeholder="John Doe"
                       value={cardDetails.name}
-                      onChange={(e) => setCardDetails({...cardDetails, name: e.target.value})}
+                      onChange={(e) => setCardDetails({ ...cardDetails, name: e.target.value })}
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
@@ -303,7 +291,7 @@ export default function CampaignDetail() {
                       <Input
                         placeholder="MM/YY"
                         value={cardDetails.expiry}
-                        onChange={(e) => setCardDetails({...cardDetails, expiry: e.target.value})}
+                        onChange={(e) => setCardDetails({ ...cardDetails, expiry: e.target.value })}
                       />
                     </div>
                     <div>
@@ -311,7 +299,7 @@ export default function CampaignDetail() {
                       <Input
                         placeholder="123"
                         value={cardDetails.cvv}
-                        onChange={(e) => setCardDetails({...cardDetails, cvv: e.target.value})}
+                        onChange={(e) => setCardDetails({ ...cardDetails, cvv: e.target.value })}
                       />
                     </div>
                   </div>
@@ -331,8 +319,8 @@ export default function CampaignDetail() {
                   </div>
                 </div>
                 <div className="p-6 border-t border-border">
-                  <Button 
-                    className="w-full" 
+                  <Button
+                    className="w-full"
                     onClick={() => {
                       setPaymentStep('processing');
                       setTimeout(() => {
@@ -344,9 +332,7 @@ export default function CampaignDetail() {
                     Pay ₦{parseInt(donationAmount).toLocaleString()}
                   </Button>
                   <div className="flex items-center justify-center gap-2 mt-4 text-xs text-muted-foreground">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0 0 12 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75Z" />
-                    </svg>
+                    <HugeiconsIcon icon={SecurityCheckIcon} className="w-4 h-4" strokeWidth={1.5} />
                     Secured by Interswitch
                   </div>
                 </div>
@@ -355,9 +341,7 @@ export default function CampaignDetail() {
             {paymentStep === 'processing' && (
               <div className="p-12 text-center">
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full empty-state-bg flex items-center justify-center">
-                  <svg className="w-8 h-8 empty-state-icon animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
+                  <HugeiconsIcon icon={MoneyAdd01Icon} className="w-8 h-8 empty-state-icon animate-spin" strokeWidth={1.5} />
                 </div>
                 <h3 className="font-heading text-xl font-bold mb-2">Processing Payment</h3>
                 <p className="text-muted-foreground">Please wait while we process your donation...</p>
@@ -366,9 +350,7 @@ export default function CampaignDetail() {
             {paymentStep === 'success' && (
               <div className="p-12 text-center">
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center">
-                  <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                  </svg>
+                  <HugeiconsIcon icon={CheckmarkCircle02Icon} className="w-8 h-8 text-green-600" strokeWidth={1.5} />
                 </div>
                 <h3 className="font-heading text-xl font-bold mb-2">Donation Successful!</h3>
                 <p className="text-muted-foreground mb-6">Thank you for your generous donation of ₦{parseInt(donationAmount).toLocaleString()}</p>

@@ -1,10 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { ArrowRight02Icon, MoneyAdd01Icon } from '@hugeicons/core-free-icons';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { mockCampaigns } from '@/lib/mock-data';
+import { StatsCard } from '@/components/shared/stats-card';
 
 interface FundMovement {
   id: string;
@@ -66,10 +69,10 @@ export default function AdminFundsPage() {
       prev.map((m) =>
         m.id === id
           ? {
-              ...m,
-              status: action === 'approve' ? 'completed' : 'rejected',
-              processedDate: new Date().toISOString().split('T')[0],
-            }
+            ...m,
+            status: action === 'approve' ? 'completed' : 'rejected',
+            processedDate: new Date().toISOString().split('T')[0],
+          }
           : m
       )
     );
@@ -91,32 +94,13 @@ export default function AdminFundsPage() {
       </div>
 
       <div className="grid md:grid-cols-4 gap-4 mb-8">
-        <Card className="bg-gradient-to-br from-red-50 to-red-100/50 border-red-100">
-          <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground mb-1">Total Raised</p>
-            <p className="text-2xl font-bold text-primary">₦{(totalRaised / 1_000_000).toFixed(1)}M</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-gradient-to-br from-green-50 to-green-100/50 border-green-100">
-          <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground mb-1">Total Withdrawn</p>
-            <p className="text-2xl font-bold text-green-600">₦{(totalWithdrawn / 1_000_000).toFixed(1)}M</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100/50 border-yellow-100">
-          <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground mb-1">Pending Requests</p>
-            <p className="text-2xl font-bold text-yellow-600">{pendingAmount.toLocaleString()}</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100/50 border-blue-100">
-          <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground mb-1">Available Balance</p>
-            <p className="text-2xl font-bold text-blue-600">
-              ₦{((totalRaised - totalWithdrawn - pendingAmount) / 1_000_000).toFixed(1)}M
-            </p>
-          </CardContent>
-        </Card>
+        <StatsCard label="Total Raised" value={`₦${(totalRaised / 1_000_000).toFixed(1)}M`} />
+        <StatsCard label="Total Withdrawn" value={`₦${(totalWithdrawn / 1_000_000).toFixed(1)}M`} />
+        <StatsCard label="Pending Requests" value={pendingAmount.toLocaleString()} />
+        <StatsCard
+          label="Available Balance"
+          value={`₦${((totalRaised - totalWithdrawn - pendingAmount) / 1_000_000).toFixed(1)}M`}
+        />
       </div>
 
       <div className="grid md:grid-cols-2 gap-6 mb-8">
@@ -245,42 +229,17 @@ export default function AdminFundsPage() {
               >
                 <div className="flex items-center gap-4">
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                      movement.type === 'withdrawal'
-                        ? 'bg-blue-100'
-                        : movement.type === 'divert'
+                    className={`w-10 h-10 rounded-full flex items-center justify-center ${movement.type === 'withdrawal'
+                      ? 'bg-blue-100'
+                      : movement.type === 'divert'
                         ? 'bg-yellow-100'
                         : 'bg-red-100'
-                    }`}
+                      }`}
                   >
                     {movement.type === 'withdrawal' ? (
-                      <svg
-                        className="w-5 h-5 text-blue-600"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z"
-                        />
-                      </svg>
+                      <HugeiconsIcon icon={MoneyAdd01Icon} className="w-5 h-5 text-blue-600" strokeWidth={1.5} />
                     ) : (
-                      <svg
-                        className="w-5 h-5 text-yellow-600"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"
-                        />
-                      </svg>
+                      <HugeiconsIcon icon={ArrowRight02Icon} className="w-5 h-5 text-yellow-600" strokeWidth={1.5} />
                     )}
                   </div>
                   <div>
@@ -294,13 +253,12 @@ export default function AdminFundsPage() {
                   <p className="font-bold text-foreground">₦{movement.amount.toLocaleString()}</p>
                   <p className="text-sm text-muted-foreground">{movement.requestDate}</p>
                   <Badge
-                    className={`mt-1 ${
-                      movement.status === 'completed'
-                        ? 'badge-success'
-                        : movement.status === 'rejected'
+                    className={`mt-1 ${movement.status === 'completed'
+                      ? 'badge-success'
+                      : movement.status === 'rejected'
                         ? 'badge-error'
                         : 'badge-warning'
-                    }`}
+                      }`}
                   >
                     {movement.status}
                   </Badge>

@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { HeartCheckIcon } from '@hugeicons/core-free-icons';
 
 export function Footer() {
   return (
@@ -8,9 +10,7 @@ export function Footer() {
           <div>
             <Link href="/" className="flex items-center gap-2 mb-4">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-white">
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-                </svg>
+                <HugeiconsIcon icon={HeartCheckIcon} className="h-5 w-5" strokeWidth={1.5} />
               </div>
               <span className="font-heading text-lg font-bold text-primary">CureLedger</span>
             </Link>

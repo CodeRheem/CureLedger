@@ -2,25 +2,16 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { CheckmarkCircle02Icon } from '@hugeicons/core-free-icons';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { mockCampaigns } from '@/lib/mock-data';
-
-interface ApprovalItem {
-  id: string;
-  campaignId: string;
-  title: string;
-  recipientName: string;
-  hospitalName: string;
-  targetAmount: number;
-  raisedAmount: number;
-  aiConfidence: number;
-  hospitalVerified: boolean;
-  submittedAt: string;
-  status: 'pending' | 'approved' | 'rejected';
-  overrideReason?: string;
-}
+import { StatsCard } from '@/components/shared/stats-card';
+import { PendingApprovalItem } from './components/pending-approval-item';
+import { ProcessedApprovalItem } from './components/processed-approval-item';
+import type { ApprovalItem } from './components/approval-types';
 
 const pendingApprovals: ApprovalItem[] = [
   {
@@ -62,10 +53,10 @@ export default function AdminApprovalsPage() {
       prev.map((item) =>
         item.id === id
           ? {
-              ...item,
-              status: action === 'approve' ? 'approved' : 'rejected',
-              overrideReason: override ? overrideReason : undefined,
-            }
+            ...item,
+            status: action === 'approve' ? 'approved' : 'rejected',
+            overrideReason: override ? overrideReason : undefined,
+          }
           : item
       )
     );
@@ -94,38 +85,13 @@ export default function AdminApprovalsPage() {
       </div>
 
       <div className="grid md:grid-cols-4 gap-4 mb-8">
-        <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100/50 border-yellow-100">
-          <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground mb-1">Pending Review</p>
-            <p className="text-3xl font-bold text-yellow-600">
-              {approvals.filter((a) => a.status === 'pending').length}
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="bg-gradient-to-br from-green-50 to-green-100/50 border-green-100">
-          <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground mb-1">Approved</p>
-            <p className="text-3xl font-bold text-green-600">
-              {approvals.filter((a) => a.status === 'approved').length}
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="bg-gradient-to-br from-red-50 to-red-100/50 border-red-100">
-          <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground mb-1">Rejected</p>
-            <p className="text-3xl font-bold text-red-600">
-              {approvals.filter((a) => a.status === 'rejected').length}
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100/50 border-blue-100">
-          <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground mb-1">Auto-Approved</p>
-            <p className="text-3xl font-bold text-blue-600">
-              {approvals.filter((a) => a.aiConfidence >= 95 && a.status === 'approved').length}
-            </p>
-          </CardContent>
-        </Card>
+        <StatsCard label="Pending Review" value={approvals.filter((a) => a.status === 'pending').length} />
+        <StatsCard label="Approved" value={approvals.filter((a) => a.status === 'approved').length} />
+        <StatsCard label="Rejected" value={approvals.filter((a) => a.status === 'rejected').length} />
+        <StatsCard
+          label="Auto-Approved"
+          value={approvals.filter((a) => a.aiConfidence >= 95 && a.status === 'approved').length}
+        />
       </div>
 
       <Card className="border-border">
@@ -137,9 +103,7 @@ export default function AdminApprovalsPage() {
           {approvals.filter((a) => a.status === 'pending').length === 0 ? (
             <div className="text-center py-12">
               <div className="w-16 h-16 mx-auto mb-4 rounded-full empty-state-bg flex items-center justify-center">
-                <svg className="w-8 h-8 empty-state-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                </svg>
+                <HugeiconsIcon icon={CheckmarkCircle02Icon} className="w-8 h-8 empty-state-icon" strokeWidth={1.5} />
               </div>
               <p className="text-muted-foreground">No pending approvals</p>
             </div>
@@ -148,60 +112,16 @@ export default function AdminApprovalsPage() {
               {approvals
                 .filter((a) => a.status === 'pending')
                 .map((approval) => (
-                  <div
+                  <PendingApprovalItem
                     key={approval.id}
-                    className="border border-border rounded-lg p-5 hover-lint"
-                  >
-                    <div className="flex items-start justify-between gap-4 mb-4">
-                      <div className="flex-1">
-                        <h3 className="font-heading font-semibold text-lg text-foreground">{approval.title}</h3>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          Recipient: {approval.recipientName} | Hospital: {approval.hospitalName}
-                        </p>
-                        <div className="flex items-center gap-2 mt-2">
-                          <Badge className="badge-warning">Pending Review</Badge>
-                          {approval.hospitalVerified && (
-                            <Badge className="badge-success">Hospital Verified</Badge>
-                          )}
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className={`p-3 rounded-lg border ${getConfidenceBg(approval.aiConfidence)}`}>
-                          <p className="text-xs text-muted-foreground mb-1">AI Confidence</p>
-                          <p className={`text-2xl font-bold ${getConfidenceColor(approval.aiConfidence)}`}>
-                            {approval.aiConfidence}%
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid md:grid-cols-3 gap-4 mb-4 text-sm">
-                      <div>
-                        <p className="text-muted-foreground">Target Amount</p>
-                        <p className="font-medium text-foreground">₦{approval.targetAmount.toLocaleString()}</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground">Raised So Far</p>
-                        <p className="font-medium text-foreground">₦{approval.raisedAmount.toLocaleString()}</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground">Submitted</p>
-                        <p className="font-medium text-foreground">{approval.submittedAt}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-2">
-                      <Button
-                        onClick={() => {
-                          setSelectedApproval(approval);
-                          setShowModal(true);
-                        }}
-                      >
-                        Review & Approve
-                      </Button>
-                      <Button variant="outline">View Documents</Button>
-                    </div>
-                  </div>
+                    approval={approval}
+                    getConfidenceBg={getConfidenceBg}
+                    getConfidenceColor={getConfidenceColor}
+                    onReview={() => {
+                      setSelectedApproval(approval);
+                      setShowModal(true);
+                    }}
+                  />
                 ))}
             </div>
           )}
@@ -218,20 +138,7 @@ export default function AdminApprovalsPage() {
               {approvals
                 .filter((a) => a.status !== 'pending')
                 .map((approval) => (
-                  <div key={approval.id} className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
-                    <div>
-                      <p className="font-medium text-foreground">{approval.title}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {approval.recipientName} - {approval.hospitalName}
-                      </p>
-                      {approval.overrideReason && (
-                        <p className="text-sm text-yellow-600 mt-1">Override: {approval.overrideReason}</p>
-                      )}
-                    </div>
-                    <Badge className={approval.status === 'approved' ? 'badge-success' : 'badge-error'}>
-                      {approval.status}
-                    </Badge>
-                  </div>
+                  <ProcessedApprovalItem key={approval.id} approval={approval} />
                 ))}
             </div>
           </CardContent>

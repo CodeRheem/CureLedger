@@ -1,6 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { ArrowRight02Icon } from '@hugeicons/core-free-icons';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -20,10 +22,10 @@ export default function AdminDashboardPage() {
 
       {/* Stats Grid */}
       <div className="grid md:grid-cols-4 gap-4 mb-8">
-        <StatsCard label="Total Campaigns" value="45" variant="blue" />
-        <StatsCard label="Approved" value="38" variant="green" />
-        <StatsCard label="Pending" value="5" variant="yellow" />
-        <StatsCard label="Total Raised" value="₦125M" variant="purple" />
+        <StatsCard label="Total Campaigns" value="45" />
+        <StatsCard label="Approved" value="38" />
+        <StatsCard label="Pending" value="5" />
+        <StatsCard label="Total Raised" value="₦125M" />
       </div>
 
       {/* Quick Actions */}
@@ -47,11 +49,9 @@ export default function AdminDashboardPage() {
             ) : (
               <p className="text-muted-foreground">No pending approvals</p>
             )}
-            <Link href="/admin/approvals" className="text-primary hover:underline font-medium mt-4 inline-block flex items-center gap-1">
-              View All 
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-              </svg>
+            <Link href="/admin/approvals" className="text-primary hover:underline font-medium mt-4 inline-flex items-center gap-1">
+              View All
+              <HugeiconsIcon icon={ArrowRight02Icon} className="w-4 h-4" strokeWidth={1.5} />
             </Link>
           </CardContent>
         </Card>

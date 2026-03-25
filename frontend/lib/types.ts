@@ -34,7 +34,7 @@ export interface IHospital extends IUser {
 }
 
 // Campaign Status
-export type CampaignStatus = 'pending_hospital' | 'pending_admin' | 'approved' | 'rejected';
+export type CampaignStatus = 'pending_hospital' | 'pending_admin' | 'approved' | 'rejected' | 'completed' | 'draft';
 
 // Campaign
 export interface ICampaign {

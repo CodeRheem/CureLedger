@@ -2,16 +2,18 @@ import express, { Express, Request, Response, NextFunction } from 'express';
 import routes from './routes';
 import cors from 'cors';
 import helmet from 'helmet';
-import dotenv from 'dotenv';
 import { ApiError } from '@core/ApiError';
-
-dotenv.config();
 
 const app: Express = express();
 
 // Middleware
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

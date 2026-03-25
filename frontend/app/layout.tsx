@@ -1,27 +1,23 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter, Instrument_Sans } from "next/font/google";
-import { Header } from "@/components/shared/header";
-import { Footer } from "@/components/shared/footer";
+import { Inter, Montserrat } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-
-const instrumentSansHeading = Instrument_Sans({subsets:['latin'],variable:'--font-heading'});
-
-const inter = Inter({subsets:['latin'],variable:'--font-sans'});
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+import { Toaster } from "sonner";
+const montserrat = Montserrat({
+  subsets: ['latin'],
+  variable: '--font-montserrat',
+  display: 'swap',
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
-  title: "CureLedger",
-  description: "Transparent health crowdfunding platform",
+  title: "CureLedger - Transparent Health Crowdfunding",
+  description: "Connect patients seeking medical support with compassionate donors. Verified by hospitals, approved by admins.",
 };
 
 export default function RootLayout({
@@ -32,12 +28,11 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", inter.variable, instrumentSansHeading.variable)}
+      className={cn("h-full", "antialiased", montserrat.variable, inter.variable, "font-sans")}
     >
-      <body className="min-h-full flex flex-col">
-        <Header />
+      <body className="min-h-full flex flex-col bg-background">
+        <Toaster position="top-right"/>
         {children}
-        <Footer />
       </body>
     </html>
   );

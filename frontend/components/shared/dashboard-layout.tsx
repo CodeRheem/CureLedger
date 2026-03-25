@@ -1,9 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { hasRole, logout } from '@/lib/auth';
+import { usePathname } from 'next/navigation';
+import { logout } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 
 interface NavItem {
@@ -26,32 +25,6 @@ export function DashboardLayout({
   role,
 }: DashboardLayoutProps) {
   const pathname = usePathname();
-  const router = useRouter();
-  const [isAuthorized, setIsAuthorized] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    if (!hasRole(role)) {
-      router.push('/login');
-    } else {
-      setIsAuthorized(true);
-    }
-    setIsLoading(false);
-  }, [router, role]);
-
-  if (isLoading) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-background">
-        <div className="text-center">
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAuthorized) {
-    return null;
-  }
 
   return (
     <div className="flex h-screen">
@@ -70,11 +43,10 @@ export function DashboardLayout({
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition ${
-                pathname === item.href
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition ${pathname === item.href
                   ? 'bg-white/20 font-semibold text-white'
                   : 'hover:bg-white/10 text-white/90'
-              }`}
+                }`}
             >
               <span className="text-xl">{item.icon}</span>
               <span>{item.label}</span>

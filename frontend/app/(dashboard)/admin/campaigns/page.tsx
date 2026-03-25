@@ -1,61 +1,96 @@
+'use client';
+
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
+
+const mockCampaigns = [
+  { id: '1', title: 'Life-Saving Heart Surgery', recipient: 'Jane Smith', target: '₦2.5M', raised: '₦1.85M', status: 'Approved' },
+  { id: '2', title: 'Emergency Cancer Treatment', recipient: 'Sarah W.', target: '₦3.5M', raised: '₦2.1M', status: 'Approved' },
+  { id: '3', title: 'Kidney Transplant Surgery', recipient: 'Muhammed A.', target: '₦4M', raised: '₦500K', status: 'Pending' },
+];
+
 export default function AdminCampaignsPage() {
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+
+  const filteredCampaigns = mockCampaigns.filter(c => {
+    const matchesSearch = c.title.toLowerCase().includes(search.toLowerCase()) ||
+      c.recipient.toLowerCase().includes(search.toLowerCase());
+    const matchesStatus = !statusFilter || c.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <h1 className="text-3xl font-bold mb-8">Manage Campaigns</h1>
-
-      <div className="mb-6 flex gap-4">
-        <select className="flex-1 px-4 py-2 border border-gray-300 rounded-lg">
-          <option value="">All Status</option>
-          <option value="approved">Approved</option>
-          <option value="pending">Pending</option>
-          <option value="rejected">Rejected</option>
-        </select>
-        <input
-          type="text"
-          placeholder="Search..."
-          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg"
-        />
+    <div className="max-w-6xl">
+      <div className="mb-8">
+        <h1 className="font-heading text-3xl font-bold text-foreground mb-2">Manage Campaigns</h1>
+        <p className="text-muted-foreground">View and manage all campaigns on the platform</p>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b-2">
-              <th className="text-left py-3 px-4 font-semibold">Campaign Title</th>
-              <th className="text-left py-3 px-4 font-semibold">Recipient</th>
-              <th className="text-left py-3 px-4 font-semibold">Target</th>
-              <th className="text-left py-3 px-4 font-semibold">Raised</th>
-              <th className="text-left py-3 px-4 font-semibold">Status</th>
-              <th className="text-left py-3 px-4 font-semibold">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {[
-              { id: 1, title: 'Life-Saving Heart Surgery', recipient: 'Jane Smith', target: '₦2.5M', raised: '₦1.85M', status: 'Approved' },
-              { id: 2, title: 'Emergency Cancer Treatment', recipient: 'Sarah W.', target: '₦3.5M', raised: '₦2.1M', status: 'Approved' },
-              { id: 3, title: 'Kidney Transplant Surgery', recipient: 'Muhammed A.', target: '₦4M', raised: '₦500K', status: 'Pending' },
-            ].map((campaign) => (
-              <tr key={campaign.id} className="border-b hover:bg-gray-50">
-                <td className="py-3 px-4 font-semibold">{campaign.title}</td>
-                <td className="py-3 px-4">{campaign.recipient}</td>
-                <td className="py-3 px-4">{campaign.target}</td>
-                <td className="py-3 px-4">{campaign.raised}</td>
-                <td className="py-3 px-4">
-                  <span className="px-3 py-1 rounded-full text-white font-semibold" style={{
-                    backgroundColor: campaign.status === 'Approved' ? '#10b981' : '#f59e0b'
-                  }}>
-                    {campaign.status}
-                  </span>
-                </td>
-                <td className="py-3 px-4">
-                  <button className="text-blue-600 hover:underline mr-3">Edit</button>
-                  <button className="text-red-600 hover:underline">Remove</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <Card className="border-border">
+        <CardHeader className="pb-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <CardTitle className="font-heading">All Campaigns</CardTitle>
+            <div className="flex gap-2 w-full sm:w-auto">
+              <select 
+                className="h-9 px-3 py-2 border border-input rounded-md bg-background text-sm"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
+                <option value="">All Status</option>
+                <option value="Approved">Approved</option>
+                <option value="Pending">Pending</option>
+                <option value="Rejected">Rejected</option>
+              </select>
+              <Input
+                placeholder="Search..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="h-9 w-48"
+              />
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Campaign Title</TableHead>
+                <TableHead>Recipient</TableHead>
+                <TableHead>Target</TableHead>
+                <TableHead>Raised</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredCampaigns.map((campaign) => (
+                <TableRow key={campaign.id}>
+                  <TableCell className="font-medium">{campaign.title}</TableCell>
+                  <TableCell>{campaign.recipient}</TableCell>
+                  <TableCell>{campaign.target}</TableCell>
+                  <TableCell>{campaign.raised}</TableCell>
+                  <TableCell>
+                    <Badge className={campaign.status === 'Approved' ? 'badge-success' : 'badge-warning'}>
+                      {campaign.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Button variant="ghost" size="sm">Edit</Button>
+                      <Button variant="ghost" size="sm" className="btn-danger-ghost">Remove</Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   );
 }

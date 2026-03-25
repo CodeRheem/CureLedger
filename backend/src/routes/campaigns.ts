@@ -68,7 +68,25 @@ router.get(
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 20;
 
-      const { campaigns, total } = await CampaignService.getPendingCampaigns(status as any, page, limit);
+      // TODO: Review - ADDED HOSPITAL FILTERING
+      // let hospitalId: string | undefined;
+      // if (req.roles?.[0] === UserRole.HOSPITAL && req.user) {
+      //   const { HospitalRepo } = await import('@database/repository/HospitalRepo');
+      //   const hospital = await HospitalRepo.findByUserId(req.user.userId);
+      //   hospitalId = hospital?._id?.toString();
+      // }
+
+      // const { campaigns, total } = await CampaignService.getPendingCampaigns(
+      //   status as any,
+      //   page,
+      //   limit,
+      //   hospitalId
+      // );
+      const { campaigns, total } = await CampaignService.getPendingCampaigns(
+        status as any,
+        page,
+        limit
+      );
 
       ApiResponse.ok(res, 'Pending campaigns retrieved', {
         campaigns,

@@ -104,6 +104,41 @@ router.get(
   })
 );
 
+// GET /campaigns/current-user - Recipient list own campaigns
+router.get(
+  '/current-user',
+  authenticate,
+  authorize(UserRole.RECIPIENT),
+  asyncHandler(async (req: Request, res: Response) => {
+    try {
+      if (!req.user) {
+        throw ApiError.unauthorized();
+      }
+
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 20;
+      const { campaigns, total } = await CampaignService.getRecipientCampaigns(
+        req.user.userId,
+        page,
+        limit
+      );
+
+      ApiResponse.ok(res, 'Current user campaigns retrieved', {
+        campaigns,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit)
+      });
+    } catch (error) {
+      if (error instanceof ApiError) {
+        res.status(error.getHttpStatus()).json(error.toResponse());
+      } else {
+        throw error;
+      }
+    }
+  })
+);
+
 // GET /campaigns/:id - Get campaign details
 router.get(
   '/:id',

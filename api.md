@@ -27,6 +27,7 @@ Health route (outside versioned API):
 
 - `GET /api/v1/campaigns`
 - `GET /api/v1/campaigns/pending` (protected: hospital/admin)
+- `GET /api/v1/campaigns/current-user` (protected: recipient)
 - `GET /api/v1/campaigns/:id`
 - `POST /api/v1/campaigns` (protected: recipient)
 - `PATCH /api/v1/campaigns/:id` (protected)

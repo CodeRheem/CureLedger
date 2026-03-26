@@ -8,6 +8,7 @@ const app: Express = express();
 
 // ✅ CORS first — before helmet and routes
 app.use(cors({
+  // origin: ['http://localhost:3000', 'http://127.0.0.1:3000', 'https://cureledger.campuscart.com.ng/api/v1'],
   origin: ['http://localhost:3000', 'http://127.0.0.1:3000', 'https://cure-ledger.vercel.app'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],

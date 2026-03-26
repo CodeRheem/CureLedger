@@ -6,14 +6,20 @@ import { ApiError } from '@core/ApiError';
 
 const app: Express = express();
 
-// Middleware
-app.use(helmet());
+// ✅ CORS first — before helmet and routes
 app.use(cors({
   origin: ['http://localhost:3000', 'http://127.0.0.1:3000','https://cure-ledger.vercel.app'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
+
+// Handle preflight requests
+app.options('*', cors());
+
+// Middleware
+app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static('uploads'));

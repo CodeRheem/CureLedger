@@ -112,7 +112,7 @@ export default function CampaignDetail() {
                 <CardContent>
                   <div className="space-y-2">
                     {campaign.documents && campaign.documents.length > 0 ? (
-                      campaign.documents.map((doc, idx) => (
+                      campaign.documents.map((doc: { name: string; type: string }, idx: number) => (
                         <div
                           key={idx}
                           className="flex items-center justify-between p-3 border border-input rounded hover:bg-muted/50 transition"

@@ -18,6 +18,7 @@ Health route (outside versioned API):
 
 - `POST /api/v1/auth/register-recipient`
 - `POST /api/v1/auth/register-hospital`
+- `POST /api/v1/auth/register-admin`
 - `POST /api/v1/auth/login`
 - `POST /api/v1/auth/send-verification-email`
 - `POST /api/v1/auth/verify-email`
@@ -40,6 +41,7 @@ Mounted via `router.use('/campaigns', verifyRoutes)`:
 - `POST /api/v1/campaigns/:campaignId/verify` (protected: hospital)
 - `POST /api/v1/campaigns/:campaignId/approve` (protected: admin)
 - `POST /api/v1/campaigns/:campaignId/reject` (protected: hospital/admin)
+- `GET /api/v1/campaigns/history` (protected: hospital)
 
 ### Donations
 
@@ -48,15 +50,26 @@ Mounted via `router.use('/campaigns', verifyRoutes)`:
 
 ### Withdrawals
 
+- `GET /api/v1/withdraw` (protected: recipient)
 - `POST /api/v1/withdraw` (protected: recipient)
 - `POST /api/v1/withdraw/:id/approve` (protected: admin)
 
 ### Admin
 
+- `GET /api/v1/admin/stats` (protected: admin)
 - `GET /api/v1/admin/recipients` (protected: admin)
 - `GET /api/v1/admin/hospitals` (protected: admin)
 - `POST /api/v1/admin/hospitals/:id/verify` (protected: admin)
 - `GET /api/v1/admin/withdrawals/pending` (protected: admin)
+- `GET /api/v1/admin/audit-logs` (protected: admin)
+
+### Hospitals
+
+- `GET /api/v1/hospitals`
+
+### Profile
+
+- `PATCH /api/v1/profile` (protected)
 
 ### Payments
 
@@ -66,14 +79,7 @@ Mounted via `router.use('/campaigns', verifyRoutes)`:
 
 ## Endpoints Present in Code but Not Exposed
 
-These route modules/endpoints exist as comments or unmounted modules and are not currently reachable:
-
-- `GET /api/v1/hospitals` (module exists but route import/mount is commented)
-- `PATCH /api/v1/profile` (module exists but route import/mount is commented)
-- `GET /api/v1/withdraw` (commented out inside withdraw routes)
-- `GET /api/v1/admin/stats` (commented out)
-- `GET /api/v1/admin/audit-logs` (commented out)
-- `GET /api/v1/campaigns/history` (commented out in verify routes)
+No backend endpoints are currently flagged as intentionally commented-out or unmounted in source route modules.
 
 ## Endpoints Still Needed (Compared to backend.md)
 
@@ -88,7 +94,7 @@ These route modules/endpoints exist as comments or unmounted modules and are not
 ## 2. Path Mismatches (Implemented but different from backend.md)
 
 - Spec: `POST /api/v1/auth/register`
-  - Current: split into `POST /api/v1/auth/register-recipient` and `POST /api/v1/auth/register-hospital`
+  - Current: split into `POST /api/v1/auth/register-recipient`, `POST /api/v1/auth/register-hospital`, and `POST /api/v1/auth/register-admin`
 
 - Spec: `POST /api/v1/campaigns/:id/withdraw`
   - Current: `POST /api/v1/withdraw` with `campaignId` in body

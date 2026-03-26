@@ -34,6 +34,16 @@ const registerHospitalSchema = Joi.object({
   })
 });
 
+const registerAdminSchema = Joi.object({
+  body: Joi.object({
+    email: Joi.string().email().required(),
+    password: Joi.string().min(6).required(),
+    firstName: Joi.string().trim().required(),
+    lastName: Joi.string().trim().required(),
+    phone: Joi.string().required()
+  })
+});
+
 const loginSchema = Joi.object({
   body: Joi.object({
     email: Joi.string().email().required(),
@@ -80,6 +90,24 @@ router.post(
     try {
       const result = await AuthService.registerHospital(req.body);
       ApiResponse.created(res, 'Hospital registered successfully', result);
+    } catch (error) {
+      if (error instanceof ApiError) {
+        res.status(400).json(error.toResponse());
+      } else {
+        throw error;
+      }
+    }
+  })
+);
+
+// POST /auth/register-admin
+router.post(
+  '/register-admin',
+  validateRequest(registerAdminSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const result = await AuthService.registerAdmin(req.body);
+      ApiResponse.created(res, 'Admin registered successfully', result);
     } catch (error) {
       if (error instanceof ApiError) {
         res.status(400).json(error.toResponse());

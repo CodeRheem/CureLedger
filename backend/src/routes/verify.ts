@@ -123,42 +123,41 @@ router.post(
   })
 );
 
-// TODO: Review - NEW ENDPOINT ADDED
 // GET /history - Get verification history (Hospital)
-// router.get(
-//   '/history',
-//   authenticate,
-//   authorize(UserRole.HOSPITAL),
-//   asyncHandler(async (req: Request, res: Response) => {
-//     try {
-//       if (!req.user) {
-//         throw ApiError.unauthorized();
-//       }
+router.get(
+  '/history',
+  authenticate,
+  authorize(UserRole.HOSPITAL),
+  asyncHandler(async (req: Request, res: Response) => {
+    try {
+      if (!req.user) {
+        throw ApiError.unauthorized();
+      }
 
-//       const page = parseInt(req.query.page as string) || 1;
-//       const limit = parseInt(req.query.limit as string) || 20;
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 20;
 
-//       const { verifications, total } = await VerificationRepo.findByVerifiedBy(
-//         req.user.userId,
-//         page,
-//         limit
-//       );
+      const { verifications, total } = await VerificationRepo.findByVerifiedBy(
+        req.user.userId,
+        page,
+        limit
+      );
 
-//       ApiResponse.ok(res, 'Verification history retrieved', {
-//         verifications,
-//         total,
-//         page,
-//         totalPages: Math.ceil(total / limit)
-//       });
-//     } catch (error) {
-//       if (error instanceof ApiError) {
-//         res.status(error.getHttpStatus()).json(error.toResponse());
-//       } else {
-//         throw error;
-//       }
-//     }
-//   })
-// );
+      ApiResponse.ok(res, 'Verification history retrieved', {
+        verifications,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit)
+      });
+    } catch (error) {
+      if (error instanceof ApiError) {
+        res.status(error.getHttpStatus()).json(error.toResponse());
+      } else {
+        throw error;
+      }
+    }
+  })
+);
 
 // POST /reject/:campaignId - Reject campaign
 router.post(

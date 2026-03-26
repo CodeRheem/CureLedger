@@ -33,21 +33,20 @@ export class WithdrawalRepo {
     return { withdrawals, total };
   }
 
-  // TODO: Review - NEW METHOD ADDED
-  // static async findByCampaignIds(
-  //   campaignIds: Types.ObjectId[],
-  //   page: number = 1,
-  //   limit: number = 20
-  // ): Promise<{ withdrawals: IWithdrawal[]; total: number }> {
-  //   const skip = (page - 1) * limit;
-  //   const withdrawals = await WithdrawalModel.find({ campaignId: { $in: campaignIds } })
-  //     .populate('campaignId', 'title')
-  //     .sort({ createdAt: -1 })
-  //     .skip(skip)
-  //     .limit(limit);
-  //   const total = await WithdrawalModel.countDocuments({ campaignId: { $in: campaignIds } });
-  //   return { withdrawals, total };
-  // }
+  static async findByCampaignIds(
+    campaignIds: Types.ObjectId[],
+    page: number = 1,
+    limit: number = 20
+  ): Promise<{ withdrawals: IWithdrawal[]; total: number }> {
+    const skip = (page - 1) * limit;
+    const withdrawals = await WithdrawalModel.find({ campaignId: { $in: campaignIds } })
+      .populate('campaignId', 'title')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+    const total = await WithdrawalModel.countDocuments({ campaignId: { $in: campaignIds } });
+    return { withdrawals, total };
+  }
 
   static async findByStatus(
     status: WithdrawalStatus,

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { StatsCard } from '@/components/shared/stats-card';
 
 interface VerificationRecord {
   id: string;
@@ -72,27 +73,10 @@ export default function HospitalHistoryPage() {
         <p className="text-muted-foreground">View your past verification decisions</p>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-4 mb-8">
-        <Card className="border-border">
-          <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground mb-1">Total Verified</p>
-            <p className="text-3xl font-bold text-green-600">{totalVerified}</p>
-          </CardContent>
-        </Card>
-        <Card className="border-border">
-          <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground mb-1">Total Rejected</p>
-            <p className="text-3xl font-bold text-red-600">{totalRejected}</p>
-          </CardContent>
-        </Card>
-        <Card className="border-border">
-          <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground mb-1">Pending Review</p>
-            <p className="text-3xl font-bold text-yellow-600">
-              {mockHistory.filter((h) => h.action === 'pending').length}
-            </p>
-          </CardContent>
-        </Card>
+      <div className="grid gap-4 md:grid-cols-3 mb-8">
+        <StatsCard label="Total Verified" value={totalVerified} />
+        <StatsCard label="Total Rejected" value={totalRejected} />
+        <StatsCard label="Pending Review" value={mockHistory.filter((h) => h.action === 'pending').length} />
       </div>
 
       <div className="flex gap-2 mb-6">
@@ -133,8 +117,8 @@ export default function HospitalHistoryPage() {
                           record.action === 'approved'
                             ? 'badge-success'
                             : record.action === 'rejected'
-                            ? 'badge-error'
-                            : 'badge-warning'
+                              ? 'badge-error'
+                              : 'badge-warning'
                         }
                       >
                         {record.action.charAt(0).toUpperCase() + record.action.slice(1)}

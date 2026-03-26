@@ -25,19 +25,18 @@ export class VerificationRepo {
       .sort({ createdAt: -1 });
   }
 
-  // TODO: Review - NEW METHOD ADDED
-  // static async findByVerifiedBy(
-  //   verifiedBy: string | Types.ObjectId,
-  //   page: number = 1,
-  //   limit: number = 20
-  // ): Promise<{ verifications: IVerification[]; total: number }> {
-  //   const skip = (page - 1) * limit;
-  //   const verifications = await VerificationModel.find({ verifiedBy })
-  //     .populate('campaignId', 'title status')
-  //     .sort({ createdAt: -1 })
-  //     .skip(skip)
-  //     .limit(limit);
-  //   const total = await VerificationModel.countDocuments({ verifiedBy });
-  //   return { verifications, total };
-  // }
+  static async findByVerifiedBy(
+    verifiedBy: string | Types.ObjectId,
+    page: number = 1,
+    limit: number = 20
+  ): Promise<{ verifications: IVerification[]; total: number }> {
+    const skip = (page - 1) * limit;
+    const verifications = await VerificationModel.find({ verifiedBy })
+      .populate('campaignId', 'title status')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+    const total = await VerificationModel.countDocuments({ verifiedBy });
+    return { verifications, total };
+  }
 }

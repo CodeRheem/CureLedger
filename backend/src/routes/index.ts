@@ -6,8 +6,8 @@ import verifyRoutes from './verify';
 import withdrawRoutes from './withdraw';
 import adminRoutes from './admin';
 import paymentRoutes from './payments';
-// import hospitalRoutes from './hospitals'; // TODO: Review - GET /hospitals endpoint
-// import profileRoutes from './profile'; // TODO: Review - PATCH /profile endpoint
+import hospitalRoutes from './hospitals';
+import profileRoutes from './profile';
 
 const router = Router();
 
@@ -19,7 +19,7 @@ router.use('/campaigns', verifyRoutes);
 router.use('/withdraw', withdrawRoutes);
 router.use('/admin', adminRoutes);
 router.use('/payments', paymentRoutes);
-// router.use('/hospitals', hospitalRoutes); // TODO: Review
-// router.use('/profile', profileRoutes); // TODO: Review
+router.use('/hospitals', hospitalRoutes);
+router.use('/profile', profileRoutes);
 
 export default router;

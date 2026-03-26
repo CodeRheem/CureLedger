@@ -3,12 +3,12 @@
 ### Backend tasks
 - [ ] Finalize canonical API contract and resolve naming/path mismatches against backend.md/api.md.
 - [x] Add POST /campaigns/:id/documents with multipart upload, type validation, and persisted metadata.
-- [ ] Add POST /admin/funds/divert with authorization, validation, and audit record.
-- [ ] Fix PaymentService initiation/status to call Interswitch collections endpoints directly.
-- [ ] Update DonationService.createDonation to initialize payment and return provider-ready payload.
-- [ ] Implement payment status verification rules (response code, amount, reference consistency).
-- [ ] Implement webhook signature verification using HMAC-SHA512 over raw body.
-- [ ] Add webhook idempotency guard and duplicate-event handling.
+- [x] Add POST /admin/funds/divert with authorization, validation, and audit record.
+- [x] Fix PaymentService initiation/status to call Interswitch collections endpoints directly.
+- [x] Update DonationService.createDonation to initialize payment and return provider-ready payload.
+- [x] Implement payment status verification rules (response code, amount, reference consistency).
+- [x] Implement webhook signature verification using HMAC-SHA512 over raw body.
+- [x] Add webhook idempotency guard and duplicate-event handling.
 - [ ] Complete withdrawal payout execution path currently marked TODO.
 - [ ] Add automated tests for payment + webhook + authorization edge cases.
 
@@ -25,10 +25,10 @@
 
 ### Payment integration tasks
 - [ ] Choose and lock MVP payment mode: Interswitch inline checkout or pay-bill redirect.
-- [ ] Add frontend payment initiation call and provider checkout launch.
+- [x] Add frontend payment initiation call and provider checkout launch.
 - [ ] Implement post-checkout verification UI state that waits for backend authoritative result.
 - [ ] Handle failure/pending/timeout/retry UX paths.
-- [ ] Persist and display payment reference for donation traceability.
+- [x] Persist and display payment reference for donation traceability.
 - [ ] Validate webhook-to-donation completion and campaign raisedAmount updates.
 - [ ] Run sandbox matrix: success, decline, timeout, duplicate webhook.
 

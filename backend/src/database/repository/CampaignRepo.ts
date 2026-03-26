@@ -37,27 +37,26 @@ export class CampaignRepo {
     return { campaigns, total };
   }
 
-  // TODO: Review - NEW METHOD ADDED
-  // static async findByStatusAndHospital(
-  //   status: CampaignStatus,
-  //   page: number = 1,
-  //   limit: number = 20,
-  //   hospitalId?: string
-  // ): Promise<{ campaigns: ICampaign[]; total: number }> {
-  //   const skip = (page - 1) * limit;
-  //   const query: any = { status };
-  //   if (hospitalId) {
-  //     query.hospitalId = hospitalId;
-  //   }
-  //   const campaigns = await CampaignModel.find(query)
-  //     .populate('recipientId', 'email firstName lastName phone avatar')
-  //     .populate('hospitalId', 'hospitalName')
-  //     .sort({ createdAt: -1 })
-  //     .skip(skip)
-  //     .limit(limit);
-  //   const total = await CampaignModel.countDocuments(query);
-  //   return { campaigns, total };
-  // }
+  static async findByStatusAndHospital(
+    status: CampaignStatus,
+    page: number = 1,
+    limit: number = 20,
+    hospitalId?: string
+  ): Promise<{ campaigns: ICampaign[]; total: number }> {
+    const skip = (page - 1) * limit;
+    const query: { status: CampaignStatus; hospitalId?: string } = { status };
+    if (hospitalId) {
+      query.hospitalId = hospitalId;
+    }
+    const campaigns = await CampaignModel.find(query)
+      .populate('recipientId', 'email firstName lastName phone avatar')
+      .populate('hospitalId', 'hospitalName')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+    const total = await CampaignModel.countDocuments(query);
+    return { campaigns, total };
+  }
 
   static async findAll(page: number = 1, limit: number = 20): Promise<{ campaigns: ICampaign[]; total: number }> {
     const skip = (page - 1) * limit;

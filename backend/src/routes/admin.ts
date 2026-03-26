@@ -2,12 +2,12 @@ import { Router, Request, Response } from 'express';
 import { RecipientRepo } from '@database/repository/RecipientRepo';
 import { HospitalRepo } from '@database/repository/HospitalRepo';
 import { WithdrawalRepo } from '@database/repository/WithdrawalRepo';
-// import CampaignModel, { CampaignStatus } from '@database/model/Campaign'; // TODO: Review
-// import RecipientModel from '@database/model/Recipient'; // TODO: Review
-// import HospitalModel from '@database/model/Hospital'; // TODO: Review
-// import DonationModel from '@database/model/Donation'; // TODO: Review
-// import VerificationModel from '@database/model/Verification'; // TODO: Review
-// import WithdrawalModel from '@database/model/Withdrawal'; // TODO: Review
+import CampaignModel, { CampaignStatus } from '@database/model/Campaign';
+import RecipientModel from '@database/model/Recipient';
+import HospitalModel from '@database/model/Hospital';
+import DonationModel from '@database/model/Donation';
+import VerificationModel from '@database/model/Verification';
+import WithdrawalModel from '@database/model/Withdrawal';
 import { UserRole } from '@database/model/User';
 import { ApiError } from '@core/ApiError';
 import { ApiResponse } from '@core/ApiResponse';
@@ -17,71 +17,70 @@ import { authorize } from '@middlewares/authorize';
 
 const router = Router();
 
-// TODO: Review - NEW ENDPOINT ADDED
 // GET /stats - Dashboard statistics (Admin)
-// router.get(
-//   '/stats',
-//   authenticate,
-//   authorize(UserRole.ADMIN),
-//   asyncHandler(async (req: Request, res: Response) => {
-//     try {
-//       const [
-//         totalCampaigns,
-//         approvedCampaigns,
-//         pendingCampaigns,
-//         rejectedCampaigns,
-//         totalRecipients,
-//         totalHospitals,
-//         verifiedHospitals,
-//         totalDonations,
-//         totalRaised,
-//         pendingWithdrawals
-//       ] = await Promise.all([
-//         CampaignModel.countDocuments(),
-//         CampaignModel.countDocuments({ status: CampaignStatus.APPROVED }),
-//         CampaignModel.countDocuments({ status: { $in: [CampaignStatus.PENDING_HOSPITAL, CampaignStatus.PENDING_ADMIN] } }),
-//         CampaignModel.countDocuments({ status: CampaignStatus.REJECTED }),
-//         RecipientModel.countDocuments(),
-//         HospitalModel.countDocuments(),
-//         HospitalModel.countDocuments({ verified: true }),
-//         DonationModel.countDocuments(),
-//         CampaignModel.aggregate([
-//           { $group: { _id: null, total: { $sum: '$raisedAmount' } } }
-//         ]),
-//         WithdrawalRepo.findByStatus('pending_approval' as any, 1, 1)
-//       ]);
+router.get(
+  '/stats',
+  authenticate,
+  authorize(UserRole.ADMIN),
+  asyncHandler(async (_req: Request, res: Response) => {
+    try {
+      const [
+        totalCampaigns,
+        approvedCampaigns,
+        pendingCampaigns,
+        rejectedCampaigns,
+        totalRecipients,
+        totalHospitals,
+        verifiedHospitals,
+        totalDonations,
+        totalRaised,
+        pendingWithdrawals
+      ] = await Promise.all([
+        CampaignModel.countDocuments(),
+        CampaignModel.countDocuments({ status: CampaignStatus.APPROVED }),
+        CampaignModel.countDocuments({ status: { $in: [CampaignStatus.PENDING_HOSPITAL, CampaignStatus.PENDING_ADMIN] } }),
+        CampaignModel.countDocuments({ status: CampaignStatus.REJECTED }),
+        RecipientModel.countDocuments(),
+        HospitalModel.countDocuments(),
+        HospitalModel.countDocuments({ verified: true }),
+        DonationModel.countDocuments(),
+        CampaignModel.aggregate([
+          { $group: { _id: null, total: { $sum: '$raisedAmount' } } }
+        ]),
+        WithdrawalRepo.findByStatus('pending_approval' as any, 1, 1)
+      ]);
 
-//       const raisedAmount = totalRaised[0]?.total || 0;
+      const raisedAmount = totalRaised[0]?.total || 0;
 
-//       ApiResponse.ok(res, 'Stats retrieved', {
-//         campaigns: {
-//           total: totalCampaigns,
-//           approved: approvedCampaigns,
-//           pending: pendingCampaigns,
-//           rejected: rejectedCampaigns
-//         },
-//         users: {
-//           recipients: totalRecipients,
-//           hospitals: totalHospitals,
-//           verifiedHospitals
-//         },
-//         donations: {
-//           total: totalDonations,
-//           totalRaised: raisedAmount
-//         },
-//         withdrawals: {
-//           pending: pendingWithdrawals.total
-//         }
-//       });
-//     } catch (error) {
-//       if (error instanceof ApiError) {
-//         res.status(error.getHttpStatus()).json(error.toResponse());
-//       } else {
-//         throw error;
-//       }
-//     }
-//   })
-// );
+      ApiResponse.ok(res, 'Stats retrieved', {
+        campaigns: {
+          total: totalCampaigns,
+          approved: approvedCampaigns,
+          pending: pendingCampaigns,
+          rejected: rejectedCampaigns
+        },
+        users: {
+          recipients: totalRecipients,
+          hospitals: totalHospitals,
+          verifiedHospitals
+        },
+        donations: {
+          total: totalDonations,
+          totalRaised: raisedAmount
+        },
+        withdrawals: {
+          pending: pendingWithdrawals.total
+        }
+      });
+    } catch (error) {
+      if (error instanceof ApiError) {
+        res.status(error.getHttpStatus()).json(error.toResponse());
+      } else {
+        throw error;
+      }
+    }
+  })
+);
 
 // GET /recipients - List all recipients (Admin)
 router.get(
@@ -191,85 +190,84 @@ router.get(
   })
 );
 
-// TODO: Review - NEW ENDPOINT ADDED
 // GET /audit-logs - Audit logs (Admin)
-// router.get(
-//   '/audit-logs',
-//   authenticate,
-//   authorize(UserRole.ADMIN),
-//   asyncHandler(async (req: Request, res: Response) => {
-//     try {
-//       const page = parseInt(req.query.page as string) || 1;
-//       const limit = parseInt(req.query.limit as string) || 50;
-//       const type = req.query.type as string;
+router.get(
+  '/audit-logs',
+  authenticate,
+  authorize(UserRole.ADMIN),
+  asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 50;
+      const type = req.query.type as string;
 
-//       let logs: any[] = [];
-//       let total = 0;
+      let logs: any[] = [];
+      let total = 0;
 
-//       const skip = (page - 1) * limit;
+      const skip = (page - 1) * limit;
 
-//       if (!type || type === 'verifications') {
-//         const verifications = await VerificationModel.find()
-//           .populate('campaignId', 'title')
-//           .populate('verifiedBy', 'firstName lastName email')
-//           .sort({ createdAt: -1 })
-//           .skip(skip)
-//           .limit(limit)
-//           .lean();
+      if (!type || type === 'verifications') {
+        const verifications = await VerificationModel.find()
+          .populate('campaignId', 'title')
+          .populate('verifiedBy', 'firstName lastName email')
+          .sort({ createdAt: -1 })
+          .skip(skip)
+          .limit(limit)
+          .lean();
 
-//         logs = verifications.map(v => ({
-//           id: v._id,
-//           type: 'campaign_verification',
-//           action: v.verified ? 'approved' : 'rejected',
-//           performedBy: v.verifiedBy,
-//           targetId: v.campaignId?._id,
-//           targetName: v.campaignId?.title,
-//           role: v.verifiedByRole,
-//           notes: v.notes,
-//           createdAt: v.createdAt
-//         }));
-//       }
+        logs = verifications.map(v => ({
+          id: v._id,
+          type: 'campaign_verification',
+          action: v.verified ? 'approved' : 'rejected',
+          performedBy: v.verifiedBy,
+          targetId: (v.campaignId as any)?._id,
+          targetName: (v.campaignId as any)?.title,
+          role: v.verifiedByRole,
+          notes: v.notes,
+          createdAt: v.createdAt
+        }));
+      }
 
-//       if (!type || type === 'withdrawals') {
-//         const withdrawals = await WithdrawalModel.find()
-//           .populate('campaignId', 'title')
-//           .populate('approvedBy', 'firstName lastName email')
-//           .sort({ createdAt: -1 })
-//           .skip(skip)
-//           .limit(limit)
-//           .lean();
+      if (!type || type === 'withdrawals') {
+        const withdrawals = await WithdrawalModel.find()
+          .populate('campaignId', 'title')
+          .populate('approvedBy', 'firstName lastName email')
+          .sort({ createdAt: -1 })
+          .skip(skip)
+          .limit(limit)
+          .lean();
 
-//         const withdrawalLogs = withdrawals.map(w => ({
-//           id: w._id,
-//           type: 'withdrawal',
-//           action: w.status,
-//           targetId: w.campaignId?._id,
-//           targetName: w.campaignId?.title,
-//           amount: w.amount,
-//           notes: w.rejectionReason,
-//           createdAt: w.createdAt
-//         }));
+        const withdrawalLogs = withdrawals.map(w => ({
+          id: w._id,
+          type: 'withdrawal',
+          action: w.status,
+          targetId: (w.campaignId as any)?._id,
+          targetName: (w.campaignId as any)?.title,
+          amount: w.amount,
+          notes: w.rejectionReason,
+          createdAt: w.createdAt
+        }));
 
-//         logs = [...logs, ...withdrawalLogs];
-//       }
+        logs = [...logs, ...withdrawalLogs];
+      }
 
-//       logs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-//       total = logs.length;
+      logs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      total = logs.length;
 
-//       ApiResponse.ok(res, 'Audit logs retrieved', {
-//         logs: logs.slice(0, limit),
-//         total,
-//         page,
-//         totalPages: Math.ceil(total / limit)
-//       });
-//     } catch (error) {
-//       if (error instanceof ApiError) {
-//         res.status(error.getHttpStatus()).json(error.toResponse());
-//       } else {
-//         throw error;
-//       }
-//     }
-//   })
-// );
+      ApiResponse.ok(res, 'Audit logs retrieved', {
+        logs: logs.slice(0, limit),
+        total,
+        page,
+        totalPages: Math.ceil(total / limit)
+      });
+    } catch (error) {
+      if (error instanceof ApiError) {
+        res.status(error.getHttpStatus()).json(error.toResponse());
+      } else {
+        throw error;
+      }
+    }
+  })
+);
 
 export default router;

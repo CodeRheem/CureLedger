@@ -97,6 +97,12 @@ export const api = {
     );
   },
 
+  getRecipientCampaigns: (page = 1, limit = 20) =>
+    fetchApi<{ campaigns: any[]; total: number }>(
+      `/campaigns/current-user?page=${page}&limit=${limit}`,
+      { token: getToken() || undefined }
+    ),
+
   createCampaign: (data: {
     title: string;
     description: string;

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { Add01Icon, File02Icon } from '@hugeicons/core-free-icons';
 import { Button } from '@/components/ui/button';
@@ -8,9 +9,27 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { mockCampaigns } from '@/lib/mock-data';
 import { StatsCard } from '@/components/shared/stats-card';
+import { api } from '@/lib/api';
 
 export default function RecipientDashboard() {
-  const myCampaigns = mockCampaigns.filter(c => c.status !== 'rejected').slice(0, 1);
+  const [myCampaigns, setMyCampaigns] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchCampaigns() {
+      try {
+        const data = await api.getRecipientCampaigns();
+        setMyCampaigns((data.campaigns || []).filter((c: any) => c.status !== 'rejected'));
+      } catch (err) {
+        console.error('Failed to fetch campaigns:', err);
+        setMyCampaigns(mockCampaigns.filter(c => c.status !== 'rejected').slice(0, 1));
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchCampaigns();
+  }, []);
+
   const hasActiveCampaign = myCampaigns.length > 0;
   const totalRaised = myCampaigns.reduce((sum, c) => sum + (c.amountRaised || c.raisedAmount), 0);
   const totalTarget = myCampaigns.reduce((sum, c) => sum + c.targetAmount, 0);
@@ -39,9 +58,11 @@ export default function RecipientDashboard() {
           <CardDescription>View and manage your fundraising campaign</CardDescription>
         </CardHeader>
         <CardContent>
-          {hasActiveCampaign ? (
+          {loading ? (
+            <p className="text-muted-foreground">Loading campaigns...</p>
+          ) : hasActiveCampaign ? (
             <div className="space-y-4">
-              {myCampaigns.map((campaign) => {
+              {myCampaigns.slice(0, 1).map((campaign) => {
                 const raised = campaign.amountRaised || campaign.raisedAmount || 0;
                 const progress = (raised / campaign.targetAmount) * 100;
 

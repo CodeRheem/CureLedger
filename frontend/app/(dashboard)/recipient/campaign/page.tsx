@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { HugeiconsIcon } from '@hugeicons/react';
@@ -10,10 +10,29 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { mockCampaigns } from '@/lib/mock-data';
 import { toast } from 'sonner';
+import { api } from '@/lib/api';
 
 export default function RecipientCampaignPage() {
   const router = useRouter();
-  const campaign = mockCampaigns.find((c) => c.status === 'approved' || c.status === 'pending_admin');
+  const [campaign, setCampaign] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchCampaigns() {
+      try {
+        const data = await api.getRecipientCampaigns();
+        const activeCampaign = (data.campaigns || []).find((c: any) => c.status === 'approved' || c.status === 'pending_admin');
+        setCampaign(activeCampaign || null);
+      } catch (err) {
+        console.error('Failed to fetch campaigns:', err);
+        const fallback = mockCampaigns.find((c) => c.status === 'approved' || c.status === 'pending_admin');
+        setCampaign(fallback || null);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchCampaigns();
+  }, []);
 
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState('');
@@ -23,6 +42,16 @@ export default function RecipientCampaignPage() {
     description: '',
     targetAmount: 0,
   });
+
+  if (loading) {
+    return (
+      <div className="max-w-4xl mx-auto py-12">
+        <div className="text-center">
+          <p className="text-muted-foreground">Loading campaign...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!campaign) {
     return (

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { CheckmarkCircle02Icon } from '@hugeicons/core-free-icons';
@@ -12,41 +12,56 @@ import { StatsCard } from '@/components/shared/stats-card';
 import { PendingApprovalItem } from './components/pending-approval-item';
 import { ProcessedApprovalItem } from './components/processed-approval-item';
 import type { ApprovalItem } from './components/approval-types';
-
-const pendingApprovals: ApprovalItem[] = [
-  {
-    id: 'approval-1',
-    campaignId: 'campaign-3',
-    title: 'Kidney Transplant Surgery',
-    recipientName: 'Muhammed Ahmed',
-    hospitalName: 'Lagos General Hospital',
-    targetAmount: 4000000,
-    raisedAmount: 500000,
-    aiConfidence: 97,
-    hospitalVerified: true,
-    submittedAt: '2024-03-01',
-    status: 'pending',
-  },
-  {
-    id: 'approval-2',
-    campaignId: 'campaign-new',
-    title: 'Emergency Brain Surgery',
-    recipientName: 'Chidi Obi',
-    hospitalName: 'Abuja Medical Centre',
-    targetAmount: 5000000,
-    raisedAmount: 0,
-    aiConfidence: 72,
-    hospitalVerified: true,
-    submittedAt: '2024-03-02',
-    status: 'pending',
-  },
-];
+import { api } from '@/lib/api';
 
 export default function AdminApprovalsPage() {
-  const [approvals, setApprovals] = useState(pendingApprovals);
+  const [approvals, setApprovals] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedApproval, setSelectedApproval] = useState<ApprovalItem | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [overrideReason, setOverrideReason] = useState('');
+
+  useEffect(() => {
+    async function fetchPendingCampaigns() {
+      try {
+        const data = await api.getPendingCampaigns('pending_admin');
+        setApprovals((data.campaigns || []).map((campaign: any, idx: number) => ({
+          id: `approval-${idx}`,
+          campaignId: campaign.id,
+          title: campaign.title,
+          recipientName: campaign.recipientName || campaign.recipient?.firstName + ' ' + campaign.recipient?.lastName,
+          hospitalName: campaign.hospitalName || campaign.hospital?.hospitalName,
+          targetAmount: campaign.targetAmount,
+          raisedAmount: campaign.amountRaised || campaign.raisedAmount || 0,
+          aiConfidence: 85, // Mock value - would come from backend if available
+          hospitalVerified: campaign.verification?.hospitalVerified || false,
+          submittedAt: campaign.createdAt,
+          status: 'pending',
+        })));
+      } catch (err) {
+        console.error('Failed to fetch pending campaigns:', err);
+        // Fallback to mock data
+        setApprovals(mockCampaigns
+          .filter(c => c.status === 'pending_admin')
+          .map((campaign, idx) => ({
+            id: `approval-${idx}`,
+            campaignId: campaign.id,
+            title: campaign.title,
+            recipientName: campaign.recipientName,
+            hospitalName: campaign.hospitalName,
+            targetAmount: campaign.targetAmount,
+            raisedAmount: campaign.amountRaised || campaign.raisedAmount || 0,
+            aiConfidence: 85,
+            hospitalVerified: campaign.verification?.hospitalVerified || false,
+            submittedAt: campaign.createdAt,
+            status: 'pending',
+          })));
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchPendingCampaigns();
+  }, []);
 
   const handleApproval = (id: string, action: 'approve' | 'reject', override = false) => {
     setApprovals((prev) =>
@@ -85,12 +100,12 @@ export default function AdminApprovalsPage() {
       </div>
 
       <div className="grid md:grid-cols-4 gap-4 mb-8">
-        <StatsCard label="Pending Review" value={approvals.filter((a) => a.status === 'pending').length} />
-        <StatsCard label="Approved" value={approvals.filter((a) => a.status === 'approved').length} />
-        <StatsCard label="Rejected" value={approvals.filter((a) => a.status === 'rejected').length} />
+        <StatsCard label="Pending Review" value={loading ? '...' : approvals.filter((a) => a.status === 'pending').length} />
+        <StatsCard label="Approved" value={loading ? '...' : approvals.filter((a) => a.status === 'approved').length} />
+        <StatsCard label="Rejected" value={loading ? '...' : approvals.filter((a) => a.status === 'rejected').length} />
         <StatsCard
           label="Auto-Approved"
-          value={approvals.filter((a) => a.aiConfidence >= 95 && a.status === 'approved').length}
+          value={loading ? '...' : approvals.filter((a) => a.aiConfidence >= 95 && a.status === 'approved').length}
         />
       </div>
 

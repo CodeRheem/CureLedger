@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { Add01Icon, File02Icon } from '@hugeicons/core-free-icons';
@@ -8,11 +8,27 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { mockCampaigns } from '@/lib/mock-data';
+import { api } from '@/lib/api';
 
 export default function RecipientCampaignsPage() {
   const [filter, setFilter] = useState<'all' | 'active' | 'completed' | 'rejected'>('all');
+  const [myCampaigns, setMyCampaigns] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const myCampaigns = mockCampaigns.filter(c => c.recipientId === 'recipient-1');
+  useEffect(() => {
+    async function fetchCampaigns() {
+      try {
+        const data = await api.getRecipientCampaigns();
+        setMyCampaigns(data.campaigns || []);
+      } catch (err) {
+        console.error('Failed to fetch campaigns:', err);
+        setMyCampaigns(mockCampaigns.filter(c => c.recipientId === 'recipient-1'));
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchCampaigns();
+  }, []);
 
   const filteredCampaigns = myCampaigns.filter(c => {
     if (filter === 'all') return true;
@@ -53,19 +69,19 @@ export default function RecipientCampaignsPage() {
         <Card className="border-border">
           <CardContent className="pt-6">
             <p className="text-sm text-muted-foreground mb-1">Total Campaigns</p>
-            <p className="text-3xl font-bold text-foreground">{myCampaigns.length}</p>
+            <p className="text-3xl font-bold text-foreground">{loading ? '...' : myCampaigns.length}</p>
           </CardContent>
         </Card>
         <Card className="border-border">
           <CardContent className="pt-6">
             <p className="text-sm text-muted-foreground mb-1">Active Campaigns</p>
-            <p className="text-3xl font-bold text-primary">{activeCount}</p>
+            <p className="text-3xl font-bold text-primary">{loading ? '...' : activeCount}</p>
           </CardContent>
         </Card>
         <Card className="border-border">
           <CardContent className="pt-6">
             <p className="text-sm text-muted-foreground mb-1">Completed</p>
-            <p className="text-3xl font-bold text-green-600">{completedCount}</p>
+            <p className="text-3xl font-bold text-green-600">{loading ? '...' : completedCount}</p>
           </CardContent>
         </Card>
       </div>
@@ -91,7 +107,13 @@ export default function RecipientCampaignsPage() {
         </Link>
       </div>
 
-      {filteredCampaigns.length === 0 ? (
+      {loading ? (
+        <Card className="border-border">
+          <CardContent className="py-8 text-center">
+            <p className="text-muted-foreground">Loading campaigns...</p>
+          </CardContent>
+        </Card>
+      ) : filteredCampaigns.length === 0 ? (
         <Card className="border-border">
           <CardContent className="py-12 text-center">
             <div className="w-16 h-16 mx-auto mb-4 rounded-full empty-state-bg flex items-center justify-center">

@@ -260,7 +260,7 @@ export default function RecipientCampaignPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            {campaign.documents?.map((doc, idx) => (
+            {campaign.documents?.map((doc: { name: string; type: string }, idx: number) => (
               <div key={idx} className="flex items-center justify-between p-3 border border-border rounded-lg">
                 <div className="flex items-center gap-3">
                   <HugeiconsIcon icon={File02Icon} className="w-5 h-5 text-muted-foreground" strokeWidth={1.5} />

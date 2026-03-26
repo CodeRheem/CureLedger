@@ -3,6 +3,8 @@ import { CampaignRepo } from '@database/repository/CampaignRepo';
 import { CampaignStatus } from '@database/model/Campaign';
 import { DonationStatus } from '@database/model/Donation';
 import { ApiError } from '@core/ApiError';
+import { PaymentService } from './PaymentService';
+import { env } from '@config/env';
 import { Types } from 'mongoose';
 
 export class DonationService {
@@ -34,7 +36,17 @@ export class DonationService {
       paymentReference
     });
 
-    // TODO: Call Interswitch or payment gateway here
+    const payment = await PaymentService.initiatePayment({
+      amount: donation.amount,
+      customerEmail: donation.donorEmail,
+      customerName: donation.donorName,
+      reference: paymentReference,
+      callbackUrl: env.FRONTEND_CALLBACK_URL || undefined,
+      metadata: {
+        donationId: donation._id?.toString(),
+        campaignId: data.campaignId
+      }
+    });
 
     return {
       id: donation._id,
@@ -42,6 +54,8 @@ export class DonationService {
       amount: donation.amount,
       status: donation.status,
       paymentReference: donation.paymentReference,
+      paymentUrl: payment.paymentUrl,
+      providerResponse: payment.providerResponse,
       createdAt: donation.createdAt
     };
   }
@@ -88,6 +102,10 @@ export class DonationService {
 
     if (!donation) {
       throw ApiError.notFound('Donation not found');
+    }
+
+    if (donation.status === DonationStatus.COMPLETED) {
+      return donation;
     }
 
     // Update donation status

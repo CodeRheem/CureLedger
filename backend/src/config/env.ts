@@ -15,6 +15,10 @@ export interface AppEnv {
   INTERSWITCH_BASE_URL: string;
   INTERSWITCH_CLIENT_ID: string;
   INTERSWITCH_SECRET_KEY: string;
+  INTERSWITCH_MERCHANT_CODE: string;
+  INTERSWITCH_PAY_ITEM_ID: string;
+  INTERSWITCH_WEBHOOK_SECRET: string;
+  FRONTEND_CALLBACK_URL: string;
   GMAIL_USER: string;
   GMAIL_APP_PASSWORD: string;
   LOG_LEVEL: string;
@@ -30,6 +34,10 @@ const envSchema = Joi.object<AppEnv>({
   INTERSWITCH_BASE_URL: Joi.string().trim().required(),
   INTERSWITCH_CLIENT_ID: Joi.string().trim().required(),
   INTERSWITCH_SECRET_KEY: Joi.string().trim().required(),
+  INTERSWITCH_MERCHANT_CODE: Joi.string().trim().allow('').default(''),
+  INTERSWITCH_PAY_ITEM_ID: Joi.string().trim().allow('').default(''),
+  INTERSWITCH_WEBHOOK_SECRET: Joi.string().trim().allow('').default(''),
+  FRONTEND_CALLBACK_URL: Joi.string().trim().uri().allow('').default(''),
   GMAIL_USER: Joi.string().trim().required(),
   GMAIL_APP_PASSWORD: Joi.string().trim().required(),
   LOG_LEVEL: Joi.string().trim().default('info')

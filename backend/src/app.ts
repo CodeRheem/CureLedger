@@ -14,7 +14,6 @@ app.use(cors({
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
 }));
 
 // Handle preflight requests
@@ -31,7 +30,7 @@ app.use('/uploads', express.static('uploads'));
 // Mount API routes
 app.use('/api/v1', routes);
 app.get('/health', (_req: Request, res: Response) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+  res.json({ status: 'OK', timestamp: new Date().toISOString(), message: 'Cure Ledger API is healthy and running' });
 });
 
 // Basic error handler

@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
+import { Be_Vietnam_Pro } from 'next/font/google';
 
 interface ProfileStatus {
   complete: boolean;
@@ -30,6 +31,7 @@ export default function RecipientProfilePage() {
     address: '',
     city: '',
     state: '',
+    bvn: '',
   });
 
   useEffect(() => {
@@ -49,6 +51,7 @@ export default function RecipientProfilePage() {
             address: data.profile?.address || '',
             city: data.profile?.city || '',
             state: data.profile?.state || '',
+            bvn: data.profile?.bvn || '',
           });
         }
       } catch (err) {
@@ -81,7 +84,7 @@ export default function RecipientProfilePage() {
   };
 
   const checkProfileComplete = (): ProfileStatus => {
-    const requiredFields = ['firstName', 'lastName', 'phone', 'nin', 'dateOfBirth', 'gender', 'address', 'city', 'state'];
+    const requiredFields = ['firstName', 'lastName', 'phone', 'nin', 'dateOfBirth', 'gender', 'address', 'city', 'state', 'bvn'];
     const missingFields = requiredFields.filter(field => !profile[field as keyof typeof profile]);
     return {
       complete: missingFields.length === 0,
@@ -105,7 +108,7 @@ export default function RecipientProfilePage() {
           <Button onClick={() => window.location.reload()}>Try Again</Button>
         </div>
       ) : (
-        <>
+        <div>
           {profileStatus.complete ? null : (
             <div>
               <div className="flex items-center gap-2 mb-2">
@@ -286,8 +289,8 @@ export default function RecipientProfilePage() {
               </div>
             </CardContent>
           </Card>
-        </>
+        </div>
       )}
     </div>
-  );
+  )
 }

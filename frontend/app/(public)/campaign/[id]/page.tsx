@@ -21,7 +21,10 @@ export default function CampaignDetail() {
   const [donationAmount, setDonationAmount] = useState('');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentStep, setPaymentStep] = useState<'form' | 'processing' | 'success'>('form');
+  const [paymentReference, setPaymentReference] = useState('');
+  const [paymentUrl, setPaymentUrl] = useState('');
   const [cardDetails, setCardDetails] = useState({ number: '', expiry: '', cvv: '', name: '' });
+  const [donorEmail, setDonorEmail] = useState('');
 
   useEffect(() => {
     async function fetchCampaign() {
@@ -76,12 +79,34 @@ export default function CampaignDetail() {
   );
   const raised = campaign.amountRaised || campaign.raisedAmount || 0;
 
+  const handleDonate = async () => {
+    try {
+      setPaymentStep('processing');
+
+      const response = await api.donate({
+        campaignId,
+        amount: parseInt(donationAmount, 10),
+        donorName: cardDetails.name,
+        donorEmail,
+        message: 'Donation from campaign page',
+      });
+
+      setPaymentReference(response.paymentReference || '');
+      setPaymentUrl(response.paymentUrl || '');
+      setPaymentStep('success');
+    } catch (err) {
+      console.error('Failed to initiate donation:', err);
+      setPaymentStep('form');
+      setError('Failed to initiate donation. Please try again.');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Breadcrumb */}
       <div className="border-b border-border bg-white">
         <div className="container mx-auto px-4 py-4">
-          <Link href="/campaignssupports-backdrop-filter:bg-white/60" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition">
+          <Link href="/campaigns" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition">
             <HugeiconsIcon icon={ArrowLeft02Icon} className="w-4 h-4" strokeWidth={1.5} />
             Back to Campaigns
           </Link>
@@ -318,6 +343,15 @@ export default function CampaignDetail() {
                       onChange={(e) => setCardDetails({ ...cardDetails, name: e.target.value })}
                     />
                   </div>
+                  <div>
+                    <label className="text-sm font-medium text-foreground mb-2 block">Email Address</label>
+                    <Input
+                      type="email"
+                      placeholder="donor@example.com"
+                      value={donorEmail}
+                      onChange={(e) => setDonorEmail(e.target.value)}
+                    />
+                  </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="text-sm font-medium text-foreground mb-2 block">Expiry Date</label>
@@ -354,13 +388,8 @@ export default function CampaignDetail() {
                 <div className="p-6 border-t border-border">
                   <Button
                     className="w-full"
-                    onClick={() => {
-                      setPaymentStep('processing');
-                      setTimeout(() => {
-                        setPaymentStep('success');
-                      }, 2000);
-                    }}
-                    disabled={!cardDetails.number || !cardDetails.expiry || !cardDetails.cvv || !cardDetails.name}
+                    onClick={handleDonate}
+                    disabled={!cardDetails.number || !cardDetails.expiry || !cardDetails.cvv || !cardDetails.name || !donorEmail}
                   >
                     Pay ₦{parseInt(donationAmount).toLocaleString()}
                   </Button>
@@ -386,21 +415,41 @@ export default function CampaignDetail() {
                   <HugeiconsIcon icon={CheckmarkCircle02Icon} className="w-8 h-8 text-green-600" strokeWidth={1.5} />
                 </div>
                 <h3 className="font-heading text-xl font-bold mb-2">Donation Successful!</h3>
-                <p className="text-muted-foreground mb-6">Thank you for your generous donation of ₦{parseInt(donationAmount).toLocaleString()}</p>
+                <p className="text-muted-foreground mb-6">
+                  {paymentUrl
+                    ? 'Your donation has been initiated. Continue to secure checkout to complete payment.'
+                    : `Thank you for your generous donation of ₦${parseInt(donationAmount).toLocaleString()}`}
+                </p>
+                {paymentReference && (
+                  <p className="text-xs text-muted-foreground mb-6">Reference: {paymentReference}</p>
+                )}
                 <div className="space-y-3">
+                  {paymentUrl && (
+                    <Button className="w-full" onClick={() => {
+                      window.location.href = paymentUrl;
+                    }}>
+                      Continue to Secure Checkout
+                    </Button>
+                  )}
                   <Button className="w-full" onClick={() => {
                     setShowPaymentModal(false);
                     setPaymentStep('form');
+                    setPaymentReference('');
+                    setPaymentUrl('');
                     setDonationAmount('');
                     setCardDetails({ number: '', expiry: '', cvv: '', name: '' });
+                    setDonorEmail('');
                   }}>
                     Donate Again
                   </Button>
                   <Button variant="outline" className="w-full" onClick={() => {
                     setShowPaymentModal(false);
                     setPaymentStep('form');
+                    setPaymentReference('');
+                    setPaymentUrl('');
                     setDonationAmount('');
                     setCardDetails({ number: '', expiry: '', cvv: '', name: '' });
+                    setDonorEmail('');
                   }}>
                     Close
                   </Button>

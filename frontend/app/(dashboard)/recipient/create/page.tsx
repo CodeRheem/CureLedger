@@ -140,7 +140,7 @@ export default function CreateCampaignPage() {
     setIsLoading(true);
 
     try {
-      await api.createCampaign({
+      const createdCampaign = await api.createCampaign({
         title: formData.title,
         description: formData.description,
         condition: formData.medicalNeed,
@@ -148,6 +148,14 @@ export default function CreateCampaignPage() {
         targetAmount: Number(formData.targetAmount),
         endsAt: formData.deadline,
       });
+
+      const campaignId = createdCampaign._id || createdCampaign.id;
+
+      if (campaignId && formData.documents.length > 0) {
+        for (const file of formData.documents) {
+          await api.uploadCampaignDocument(campaignId, file, 'medical_report');
+        }
+      }
 
       setIsSuccess(true);
 

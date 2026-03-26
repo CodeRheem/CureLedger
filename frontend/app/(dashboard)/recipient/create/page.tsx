@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { mockHospitals } from '@/lib/mock-data';
+// import { mockHospitals } from '@/lib/mock-data';
 import { api } from '@/lib/api';
 
 interface Hospital {
@@ -26,6 +26,7 @@ export default function CreateCampaignPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
   const [loadingHospitals, setLoadingHospitals] = useState(true);
+  const [hospitalError, setHospitalError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -50,14 +51,8 @@ export default function CreateCampaignPage() {
         );
       } catch (err) {
         console.error('Failed to fetch hospitals:', err);
-        setHospitals(
-          mockHospitals.map((h) => ({
-            id: h.id,
-            name: h.hospitalName,
-            license: h.hospitalLicense,
-            address: h.address,
-          }))
-        );
+        setHospitalError('Failed to load hospitals');
+        setHospitals([]);
       } finally {
         setLoadingHospitals(false);
       }
@@ -322,6 +317,10 @@ export default function CreateCampaignPage() {
                     <option value="">Select a verified hospital</option>
                     {loadingHospitals ? (
                       <option disabled>Loading hospitals...</option>
+                    ) : hospitalError ? (
+                      <option disabled>Failed to load hospitals</option>
+                    ) : hospitals.length === 0 ? (
+                      <option disabled>No hospitals available</option>
                     ) : (
                       hospitals.map((h) => (
                         <option key={h.id} value={h.id}>
@@ -331,6 +330,7 @@ export default function CreateCampaignPage() {
                     )}
                   </select>
                   {errors.hospital && <p className="text-sm text-red-500">{errors.hospital}</p>}
+                  {hospitalError && <p className="text-sm text-red-500">{hospitalError}</p>}
                   <p className="text-xs text-muted-foreground">Only verified hospitals are shown</p>
                 </div>
 

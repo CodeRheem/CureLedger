@@ -7,13 +7,14 @@ import { CheckmarkCircle02Icon } from '@hugeicons/core-free-icons';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { mockCampaigns } from '@/lib/mock-data';
+// import { mockCampaigns } from '@/lib/mock-data';
 import { StatsCard } from '@/components/shared/stats-card';
 import { api } from '@/lib/api';
 
 export default function HospitalDashboardPage() {
   const [pendingCampaigns, setPendingCampaigns] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchPendingCampaigns() {
@@ -22,7 +23,7 @@ export default function HospitalDashboardPage() {
         setPendingCampaigns(data.campaigns || []);
       } catch (err) {
         console.error('Failed to fetch pending campaigns:', err);
-        setPendingCampaigns(mockCampaigns.filter(c => c.status === 'pending_hospital'));
+        setError('Failed to load pending campaigns');
       } finally {
         setLoading(false);
       }
@@ -40,9 +41,19 @@ export default function HospitalDashboardPage() {
 
       {/* Stats Grid */}
       <div className="grid md:grid-cols-3 gap-4 mb-8">
-        <StatsCard label="Pending Verifications" value={pendingCampaigns.length} />
-        <StatsCard label="Verified Patients" value="12" />
-        <StatsCard label="Verified Campaigns" value="12" />
+        {loading ? (
+          <>
+            <div className="bg-white rounded-lg border border-border p-4 animate-pulse"><div className="h-4 bg-gray-200 rounded w-32 mb-2" /><div className="h-8 bg-gray-200 rounded w-16" /></div>
+            <div className="bg-white rounded-lg border border-border p-4 animate-pulse"><div className="h-4 bg-gray-200 rounded w-32 mb-2" /><div className="h-8 bg-gray-200 rounded w-16" /></div>
+            <div className="bg-white rounded-lg border border-border p-4 animate-pulse"><div className="h-4 bg-gray-200 rounded w-32 mb-2" /><div className="h-8 bg-gray-200 rounded w-16" /></div>
+          </>
+        ) : (
+          <>
+            <StatsCard label="Pending Verifications" value={pendingCampaigns.length} />
+            <StatsCard label="Verified Patients" value="-" />
+            <StatsCard label="Verified Campaigns" value="-" />
+          </>
+        )}
       </div>
 
       {/* Pending Verifications */}
@@ -53,6 +64,26 @@ export default function HospitalDashboardPage() {
         </CardHeader>
         <CardContent>
           {loading ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="border border-border rounded-lg p-5 animate-pulse">
+                  <div className="flex justify-between items-start gap-4">
+                    <div className="flex-1 space-y-2">
+                      <div className="h-5 bg-gray-200 rounded w-3/4" />
+                      <div className="h-4 bg-gray-200 rounded w-1/2" />
+                      <div className="h-4 bg-gray-200 rounded w-1/3" />
+                    </div>
+                    <div className="h-10 bg-gray-200 rounded w-20" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : error ? (
+            <div className="text-center py-8">
+              <p className="text-red-500 mb-4">{error}</p>
+              <Button variant="outline" onClick={() => window.location.reload()}>Try Again</Button>
+            </div>
+          ) : pendingCampaigns.length > 0 ? (
             <div className="space-y-4">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="border border-border rounded-lg p-5 animate-pulse">

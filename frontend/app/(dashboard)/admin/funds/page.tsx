@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { ArrowRight02Icon, MoneyAdd01Icon } from '@hugeicons/core-free-icons';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { mockCampaigns } from '@/lib/mock-data';
 import { StatsCard } from '@/components/shared/stats-card';
+import { api } from '@/lib/api';
 
 interface FundMovement {
   id: string;
@@ -59,26 +59,74 @@ const fundMovements: FundMovement[] = [
   },
 ];
 
+interface FundMovement {
+  id: string;
+  campaignId: string;
+  campaignTitle: string;
+  recipientName: string;
+  type: 'withdrawal' | 'divert' | 'refund';
+  amount: number;
+  status: 'pending' | 'completed' | 'rejected';
+  requestDate: string;
+  processedDate?: string;
+  destination?: string;
+  reason?: string;
+}
+
 export default function AdminFundsPage() {
-  const [movements, setMovements] = useState(fundMovements);
+  const [movements, setMovements] = useState<FundMovement[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showDivertModal, setShowDivertModal] = useState(false);
   const [selectedMovement, setSelectedMovement] = useState<FundMovement | null>(null);
 
-  const handleProcess = (id: string, action: 'approve' | 'reject') => {
-    setMovements((prev) =>
-      prev.map((m) =>
-        m.id === id
-          ? {
-            ...m,
-            status: action === 'approve' ? 'completed' : 'rejected',
-            processedDate: new Date().toISOString().split('T')[0],
-          }
-          : m
-      )
-    );
+  useEffect(() => {
+    async function fetchWithdrawals() {
+      try {
+        const data = await api.getPendingWithdrawals();
+        const formatted: FundMovement[] = (data.withdrawals || []).map((w: any) => ({
+          id: w._id || w.id,
+          campaignId: w.campaignId?._id || w.campaignId,
+          campaignTitle: w.campaignId?.title || 'Unknown Campaign',
+          recipientName: 'Unknown',
+          type: 'withdrawal',
+          amount: w.amount,
+          status: w.status === 'pending_approval' ? 'pending' : w.status,
+          requestDate: w.createdAt ? new Date(w.createdAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+          processedDate: w.processedAt ? new Date(w.processedAt).toISOString().split('T')[0] : undefined,
+        }));
+        setMovements(formatted);
+      } catch (err) {
+        console.error('Failed to fetch withdrawals:', err);
+        setError('Failed to load fund requests');
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchWithdrawals();
+  }, []);
+
+  const handleProcess = async (id: string, action: 'approve' | 'reject') => {
+    try {
+      await api.processWithdrawal(id, action === 'approve');
+      setMovements((prev) =>
+        prev.map((m) =>
+          m.id === id
+            ? {
+                ...m,
+                status: action === 'approve' ? 'completed' : 'rejected',
+                processedDate: new Date().toISOString().split('T')[0],
+              }
+            : m
+        )
+      );
+    } catch (err) {
+      console.error('Failed to process withdrawal:', err);
+      setError('Failed to process request');
+    }
   };
 
-  const totalRaised = mockCampaigns.reduce((sum, c) => sum + (c.amountRaised || 0), 0);
+  const totalRaised = movements.reduce((sum, m) => sum + m.amount, 0);
   const totalWithdrawn = movements
     .filter((m) => m.type === 'withdrawal' && m.status === 'completed')
     .reduce((sum, m) => sum + m.amount, 0);
@@ -94,13 +142,29 @@ export default function AdminFundsPage() {
       </div>
 
       <div className="grid md:grid-cols-4 gap-4 mb-8">
-        <StatsCard label="Total Raised" value={`₦${(totalRaised / 1_000_000).toFixed(1)}M`} />
-        <StatsCard label="Total Withdrawn" value={`₦${(totalWithdrawn / 1_000_000).toFixed(1)}M`} />
-        <StatsCard label="Pending Requests" value={pendingAmount.toLocaleString()} />
-        <StatsCard
-          label="Available Balance"
-          value={`₦${((totalRaised - totalWithdrawn - pendingAmount) / 1_000_000).toFixed(1)}M`}
-        />
+        {loading ? (
+          <>
+            <div className="bg-white rounded-lg border border-border p-4 animate-pulse"><div className="h-4 bg-gray-200 rounded w-24 mb-2" /><div className="h-8 bg-gray-200 rounded w-20" /></div>
+            <div className="bg-white rounded-lg border border-border p-4 animate-pulse"><div className="h-4 bg-gray-200 rounded w-24 mb-2" /><div className="h-8 bg-gray-200 rounded w-20" /></div>
+            <div className="bg-white rounded-lg border border-border p-4 animate-pulse"><div className="h-4 bg-gray-200 rounded w-24 mb-2" /><div className="h-8 bg-gray-200 rounded w-20" /></div>
+            <div className="bg-white rounded-lg border border-border p-4 animate-pulse"><div className="h-4 bg-gray-200 rounded w-24 mb-2" /><div className="h-8 bg-gray-200 rounded w-20" /></div>
+          </>
+        ) : error ? (
+          <div className="col-span-4 bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+            <p className="text-red-600">{error}</p>
+            <Button variant="outline" size="sm" className="mt-2" onClick={() => window.location.reload()}>Try Again</Button>
+          </div>
+        ) : (
+          <>
+            <StatsCard label="Total Raised" value={`₦${(totalRaised / 1_000_000).toFixed(1)}M`} />
+            <StatsCard label="Total Withdrawn" value={`₦${(totalWithdrawn / 1_000_000).toFixed(1)}M`} />
+            <StatsCard label="Pending Requests" value={pendingAmount.toLocaleString()} />
+            <StatsCard
+              label="Available Balance"
+              value={`₦${((totalRaised - totalWithdrawn - pendingAmount) / 1_000_000).toFixed(1)}M`}
+            />
+          </>
+        )}
       </div>
 
       <div className="grid md:grid-cols-2 gap-6 mb-8">
@@ -110,7 +174,16 @@ export default function AdminFundsPage() {
             <CardDescription>Funds awaiting admin approval</CardDescription>
           </CardHeader>
           <CardContent>
-            {movements.filter((m) => m.status === 'pending').length === 0 ? (
+            {loading ? (
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="border border-border rounded-lg p-4 animate-pulse">
+                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
+                    <div className="h-3 bg-gray-200 rounded w-1/2" />
+                  </div>
+                ))}
+              </div>
+            ) : movements.filter((m) => m.status === 'pending').length === 0 ? (
               <p className="text-muted-foreground text-center py-8">No pending fund requests</p>
             ) : (
               <div className="space-y-4">

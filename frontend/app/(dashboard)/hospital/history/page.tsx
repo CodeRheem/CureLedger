@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { StatsCard } from '@/components/shared/stats-card';
+import { api } from '@/lib/api';
 
 interface VerificationRecord {
   id: string;
@@ -17,7 +18,35 @@ interface VerificationRecord {
   notes?: string;
 }
 
-const mockHistory: VerificationRecord[] = [
+export default function HospitalHistoryPage() {
+  const [history, setHistory] = useState<VerificationRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchHistory() {
+      try {
+        const data = await api.getVerificationHistory();
+        setHistory(
+          (data.verifications || []).map((v: any) => ({
+            id: v._id || v.id,
+            patientName: v.campaignId?.recipientId?.firstName + ' ' + v.campaignId?.recipientId?.lastName || 'Unknown',
+            condition: v.campaignId?.condition || 'Unknown',
+            campaignTitle: v.campaignId?.title || 'Unknown',
+            action: v.verified ? 'approved' : 'rejected',
+            date: v.createdAt ? new Date(v.createdAt).toISOString().split('T')[0] : '',
+            notes: v.notes,
+          }))
+        );
+      } catch (err) {
+        console.error('Failed to fetch verification history:', err);
+        setError('Failed to load verification history');
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchHistory();
+  }, []);
   {
     id: 'v1',
     patientName: 'Tobi Johnson',
@@ -58,13 +87,13 @@ const mockHistory: VerificationRecord[] = [
 export default function HospitalHistoryPage() {
   const [filter, setFilter] = useState<'all' | 'approved' | 'rejected'>('all');
 
-  const filteredHistory = mockHistory.filter((h) => {
+  const filteredHistory = history.filter((h) => {
     if (filter === 'all') return true;
     return h.action === filter;
   });
 
-  const totalVerified = mockHistory.filter((h) => h.action === 'approved').length;
-  const totalRejected = mockHistory.filter((h) => h.action === 'rejected').length;
+  const totalVerified = history.filter((h) => h.action === 'approved').length;
+  const totalRejected = history.filter((h) => h.action === 'rejected').length;
 
   return (
     <div className="max-w-6xl">
@@ -98,7 +127,23 @@ export default function HospitalHistoryPage() {
           <CardDescription>Complete history of your verification decisions</CardDescription>
         </CardHeader>
         <CardContent>
-          {filteredHistory.length === 0 ? (
+          {loading ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex items-start justify-between p-4 border border-border rounded-lg animate-pulse">
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-gray-200 rounded w-32" />
+                    <div className="h-3 bg-gray-200 rounded w-48" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : error ? (
+            <div className="text-center py-8">
+              <p className="text-red-500 mb-4">{error}</p>
+              <Button variant="outline" onClick={() => window.location.reload()}>Try Again</Button>
+            </div>
+          ) : filteredHistory.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-muted-foreground">No records found</p>
             </div>

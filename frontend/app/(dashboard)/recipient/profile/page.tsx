@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { UserCircleIcon } from '@hugeicons/core-free-icons';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { api } from '@/lib/api';
+import { toast } from 'sonner';
 
 interface ProfileStatus {
   complete: boolean;
@@ -14,13 +16,13 @@ interface ProfileStatus {
 
 export default function RecipientProfilePage() {
   const [saved, setSaved] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [profile, setProfile] = useState({
-    firstName: 'Jane',
-    lastName: 'Smith',
-    email: 'jane@example.com',
-    phone: '+2348098765432',
-    bvn: '12345678901',
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
     nin: '',
     dateOfBirth: '',
     gender: '',
@@ -29,9 +31,51 @@ export default function RecipientProfilePage() {
     state: '',
   });
 
+  useEffect(() => {
+    async function fetchProfile() {
+      try {
+        const data = await api.getProfile();
+        if (data.user) {
+          setProfile({
+            firstName: data.user.firstName || '',
+            lastName: data.user.lastName || '',
+            email: data.user.email || '',
+            phone: data.user.phone || '',
+            nin: data.profile?.nin || '',
+            dateOfBirth: data.profile?.dateOfBirth || '',
+            gender: data.profile?.gender || '',
+            address: data.profile?.address || '',
+            city: data.profile?.city || '',
+            state: data.profile?.state || '',
+          });
+        }
+      } catch (err) {
+        console.error('Failed to fetch profile:', err);
+        setError('Failed to load profile');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchProfile();
+  }, []);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
     setSaved(false);
+  };
+
+  const handleSave = async () => {
+    setIsLoading(true);
+    try {
+      await api.updateProfile(profile);
+      setSaved(true);
+      toast.success('Profile saved successfully');
+    } catch (err) {
+      console.error('Failed to save profile:', err);
+      toast.error('Failed to save profile');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const checkProfileComplete = (): ProfileStatus => {
@@ -45,23 +89,22 @@ export default function RecipientProfilePage() {
 
   const profileStatus = checkProfileComplete();
 
-  const handleSave = async () => {
-    setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setIsLoading(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
-  };
-
   return (
     <div className="max-w-2xl">
-      <div className="mb-8">
-        <h1 className="font-heading text-3xl font-bold text-foreground mb-2">My Profile</h1>
-        <p className="text-muted-foreground">Manage your personal information</p>
-      </div>
-
-      {!profileStatus.complete && (
-        <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+      {isLoading && !profile.firstName ? (
+        <div className="space-y-4 animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-48 mb-8" />
+          <div className="h-32 bg-gray-200 rounded" />
+          <div className="h-64 bg-gray-200 rounded" />
+        </div>
+      ) : error ? (
+        <div className="text-center py-12">
+          <p className="text-red-500 mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()}>Try Again</Button>
+        </div>
+      ) : (
+        <>
+      {profileStatus.complete ? null : (
           <div className="flex items-center gap-2 mb-2">
             <svg className="w-5 h-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.019-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />

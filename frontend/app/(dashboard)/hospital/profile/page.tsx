@@ -1,23 +1,50 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { CheckmarkCircle02Icon, Hospital02Icon } from '@hugeicons/core-free-icons';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { api } from '@/lib/api';
+import { toast } from 'sonner';
 
 export default function HospitalProfilePage() {
   const [saved, setSaved] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [profile, setProfile] = useState({
-    hospitalName: 'Lagos General Hospital',
-    hospitalLicense: 'HOSP/2024/12345',
-    contactPerson: 'Dr. John Smith',
-    email: 'lagos.general@hospital.com',
-    phone: '+2348012345678',
-    address: '123 Medical Street, Lagos',
+    hospitalName: '',
+    hospitalLicense: '',
+    contactPerson: '',
+    email: '',
+    phone: '',
+    address: '',
   });
+
+  useEffect(() => {
+    async function fetchProfile() {
+      try {
+        const data = await api.getProfile();
+        if (data.user) {
+          setProfile({
+            hospitalName: data.profile?.hospitalName || '',
+            hospitalLicense: data.profile?.hospitalLicense || '',
+            contactPerson: data.user.firstName + ' ' + data.user.lastName,
+            email: data.user.email || '',
+            phone: data.user.phone || '',
+            address: data.profile?.address || '',
+          });
+        }
+      } catch (err) {
+        console.error('Failed to fetch profile:', err);
+        setError('Failed to load profile');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchProfile();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
@@ -26,10 +53,16 @@ export default function HospitalProfilePage() {
 
   const handleSave = async () => {
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setIsLoading(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    try {
+      await api.updateProfile(profile);
+      setSaved(true);
+      toast.success('Profile saved successfully');
+    } catch (err) {
+      console.error('Failed to save profile:', err);
+      toast.error('Failed to save profile');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

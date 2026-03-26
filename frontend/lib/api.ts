@@ -22,8 +22,25 @@ async function fetchApi<T>(endpoint: string, options: FetchOptions = {}): Promis
   });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: 'An error occurred' }));
-    throw new Error(error.message || `HTTP error! status: ${response.status}`);
+    let error: any = { message: 'An error occurred' };
+    try {
+      error = await response.json();
+    } catch {
+      // Response is not JSON, use status text or default message
+      error = { message: response.statusText || 'An error occurred' };
+    }
+
+    const errorMessage = error.message || error.error || `HTTP error! status: ${response.status}`;
+    const customError = new Error(errorMessage);
+    (customError as any).statusCode = response.status;
+    (customError as any).fullResponse = error;
+    
+    // Debug log for troubleshooting
+    if (typeof window !== 'undefined') {
+      console.error(`API Error [${response.status}] ${endpoint}:`, error);
+    }
+    
+    throw customError;
   }
 
   const data = await response.json();
@@ -32,7 +49,13 @@ async function fetchApi<T>(endpoint: string, options: FetchOptions = {}): Promis
 
 function getToken(): string | null {
   if (typeof window === 'undefined') return null;
-  return localStorage.getItem('authToken');
+  const token = localStorage.getItem('authToken');
+  // Prevent accidental 'undefined' string from being stored
+  if (token === 'undefined' || token === 'null') {
+    localStorage.removeItem('authToken');
+    return null;
+  }
+  return token;
 }
 
 export const api = {
@@ -129,21 +152,21 @@ export const api = {
 
   // Verifications
   verifyCampaign: (campaignId: string, verified: boolean, notes?: string) =>
-    fetchApi<any>(`/verify/${campaignId}/verify`, {
+    fetchApi<any>(`/campaigns/${campaignId}/verify`, {
       method: 'POST',
       body: JSON.stringify({ verified, notes }),
       token: getToken() || undefined,
     }),
 
   approveCampaign: (campaignId: string, approved: boolean, notes?: string) =>
-    fetchApi<any>(`/verify/${campaignId}/approve`, {
+    fetchApi<any>(`/campaigns/${campaignId}/approve`, {
       method: 'POST',
       body: JSON.stringify({ approved, notes }),
       token: getToken() || undefined,
     }),
 
   rejectCampaign: (campaignId: string, reason: string) =>
-    fetchApi<any>(`/verify/${campaignId}/reject`, {
+    fetchApi<any>(`/campaigns/${campaignId}/reject`, {
       method: 'POST',
       body: JSON.stringify({ reason }),
       token: getToken() || undefined,
@@ -151,7 +174,7 @@ export const api = {
 
   getVerificationHistory: (page = 1, limit = 20) =>
     fetchApi<{ verifications: any[]; total: number }>(
-      `/verify/history?page=${page}&limit=${limit}`,
+      `/campaigns/verifications/history?page=${page}&limit=${limit}`,
       { token: getToken() || undefined }
     ),
 

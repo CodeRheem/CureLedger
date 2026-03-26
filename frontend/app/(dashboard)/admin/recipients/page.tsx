@@ -92,7 +92,7 @@ export default function AdminRecipientsPage() {
             <TableBody>
               {loading && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                  <TableCell className="text-center text-muted-foreground py-8">
                     Loading recipients...
                   </TableCell>
                 </TableRow>

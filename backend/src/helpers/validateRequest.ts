@@ -10,7 +10,7 @@ export const validateRequest = (schema: Schema) => {
         params: req.params,
         query: req.query
       },
-      { abortEarly: false }
+      { abortEarly: false, allowUnknown: true }
     );
 
     if (error) {

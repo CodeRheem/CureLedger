@@ -68,6 +68,14 @@ export default function LoginPage() {
 
     try {
       const data = await api.login(email, password);
+      
+      // Validate token exists
+      if (!data.token) {
+        setError('Login failed: No authentication token received');
+        setIsLoading(false);
+        return;
+      }
+      
       localStorage.setItem('authToken', data.token);
       localStorage.setItem('userRole', role);
       localStorage.setItem('userEmail', email);

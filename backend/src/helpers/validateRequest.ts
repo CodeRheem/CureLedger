@@ -10,7 +10,12 @@ export const validateRequest = (schema: Schema) => {
         params: req.params,
         query: req.query
       },
-      { abortEarly: false }
+      {
+        abortEarly: false,
+        // Route schemas often validate only one of body/params/query.
+        // Allow the other top-level keys to exist without failing validation.
+        allowUnknown: true
+      }
     );
 
     if (error) {

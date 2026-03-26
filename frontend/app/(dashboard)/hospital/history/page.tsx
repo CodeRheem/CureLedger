@@ -47,44 +47,7 @@ export default function HospitalHistoryPage() {
     }
     fetchHistory();
   }, []);
-  {
-    id: 'v1',
-    patientName: 'Tobi Johnson',
-    condition: 'Congenital Heart Disease',
-    campaignTitle: 'Life-Saving Heart Surgery',
-    action: 'approved',
-    date: '2024-02-10',
-    notes: 'All documents verified. Patient identity confirmed.',
-  },
-  {
-    id: 'v2',
-    patientName: 'Sarah Williams',
-    condition: 'Stage 3 Breast Cancer',
-    campaignTitle: 'Emergency Cancer Treatment',
-    action: 'approved',
-    date: '2024-02-12',
-    notes: 'Medical reports authentic. Treatment plan verified.',
-  },
-  {
-    id: 'v3',
-    patientName: 'Muhammed Ahmed',
-    condition: 'End-Stage Renal Disease',
-    campaignTitle: 'Kidney Transplant Surgery',
-    action: 'pending',
-    date: '2024-02-28',
-  },
-  {
-    id: 'v4',
-    patientName: 'Grace Peters',
-    condition: 'Spinal Cord Injury',
-    campaignTitle: 'Spinal Surgery Fund',
-    action: 'rejected',
-    date: '2024-02-05',
-    notes: 'Incomplete medical documentation. Missing doctor recommendation.',
-  },
-];
 
-export default function HospitalHistoryPage() {
   const [filter, setFilter] = useState<'all' | 'approved' | 'rejected'>('all');
 
   const filteredHistory = history.filter((h) => {
@@ -105,7 +68,7 @@ export default function HospitalHistoryPage() {
       <div className="grid gap-4 md:grid-cols-3 mb-8">
         <StatsCard label="Total Verified" value={totalVerified} />
         <StatsCard label="Total Rejected" value={totalRejected} />
-        <StatsCard label="Pending Review" value={mockHistory.filter((h) => h.action === 'pending').length} />
+        <StatsCard label="Pending Review" value={'3'} />
       </div>
 
       <div className="flex gap-2 mb-6">

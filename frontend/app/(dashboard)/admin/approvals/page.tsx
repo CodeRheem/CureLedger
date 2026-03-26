@@ -7,7 +7,6 @@ import { CheckmarkCircle02Icon } from '@hugeicons/core-free-icons';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { mockCampaigns } from '@/lib/mock-data';
 import { StatsCard } from '@/components/shared/stats-card';
 import { PendingApprovalItem } from './components/pending-approval-item';
 import { ProcessedApprovalItem } from './components/processed-approval-item';
@@ -17,6 +16,7 @@ import { api } from '@/lib/api';
 export default function AdminApprovalsPage() {
   const [approvals, setApprovals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedApproval, setSelectedApproval] = useState<ApprovalItem | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [overrideReason, setOverrideReason] = useState('');
@@ -24,6 +24,7 @@ export default function AdminApprovalsPage() {
   useEffect(() => {
     async function fetchPendingCampaigns() {
       try {
+        setError(null);
         const data = await api.getPendingCampaigns('pending_admin');
         setApprovals((data.campaigns || []).map((campaign: any, idx: number) => ({
           id: `approval-${idx}`,
@@ -33,29 +34,15 @@ export default function AdminApprovalsPage() {
           hospitalName: campaign.hospitalName || campaign.hospital?.hospitalName,
           targetAmount: campaign.targetAmount,
           raisedAmount: campaign.amountRaised || campaign.raisedAmount || 0,
-          aiConfidence: 85, // Mock value - would come from backend if available
+          aiConfidence: 85,
           hospitalVerified: campaign.verification?.hospitalVerified || false,
           submittedAt: campaign.createdAt,
           status: 'pending',
         })));
       } catch (err) {
         console.error('Failed to fetch pending campaigns:', err);
-        // Fallback to mock data
-        setApprovals(mockCampaigns
-          .filter(c => c.status === 'pending_admin')
-          .map((campaign, idx) => ({
-            id: `approval-${idx}`,
-            campaignId: campaign.id,
-            title: campaign.title,
-            recipientName: campaign.recipientName,
-            hospitalName: campaign.hospitalName,
-            targetAmount: campaign.targetAmount,
-            raisedAmount: campaign.amountRaised || campaign.raisedAmount || 0,
-            aiConfidence: 85,
-            hospitalVerified: campaign.verification?.hospitalVerified || false,
-            submittedAt: campaign.createdAt,
-            status: 'pending',
-          })));
+        setError('Failed to load pending approvals. Please try again later.');
+        setApprovals([]);
       } finally {
         setLoading(false);
       }
@@ -91,6 +78,28 @@ export default function AdminApprovalsPage() {
     if (score >= 85) return 'bg-yellow-50 border-yellow-200';
     return 'bg-red-50 border-red-200';
   };
+
+  if (error) {
+    return (
+      <div className="max-w-6xl">
+        <div className="mb-8">
+          <h1 className="font-heading text-3xl font-bold text-foreground mb-2">Approval Queue</h1>
+          <p className="text-muted-foreground">Review campaigns with AI confidence scores and override controls</p>
+        </div>
+        <Card className="border-destructive bg-destructive/5">
+          <CardContent className="py-8">
+            <div className="flex items-center gap-3">
+              <div className="text-destructive text-2xl">⚠️</div>
+              <div>
+                <p className="font-semibold text-destructive">{error}</p>
+                <p className="text-sm text-muted-foreground mt-1">Please refresh the page or contact support if the problem persists.</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl">

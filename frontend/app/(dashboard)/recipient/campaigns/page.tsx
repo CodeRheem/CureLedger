@@ -7,22 +7,24 @@ import { Add01Icon, File02Icon } from '@hugeicons/core-free-icons';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { mockCampaigns } from '@/lib/mock-data';
 import { api } from '@/lib/api';
 
 export default function RecipientCampaignsPage() {
   const [filter, setFilter] = useState<'all' | 'active' | 'completed' | 'rejected'>('all');
   const [myCampaigns, setMyCampaigns] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchCampaigns() {
       try {
+        setError(null);
         const data = await api.getRecipientCampaigns();
         setMyCampaigns(data.campaigns || []);
       } catch (err) {
         console.error('Failed to fetch campaigns:', err);
-        setMyCampaigns(mockCampaigns.filter(c => c.recipientId === 'recipient-1'));
+        setError('Failed to load campaigns. Please try again later.');
+        setMyCampaigns([]);
       } finally {
         setLoading(false);
       }
@@ -54,6 +56,36 @@ export default function RecipientCampaignsPage() {
         return <Badge variant="outline">{status}</Badge>;
     }
   };
+
+  if (error) {
+    return (
+      <div className="max-w-6xl">
+        <div className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="font-heading text-3xl font-bold text-foreground mb-2">My Campaigns</h1>
+            <p className="text-muted-foreground">Track and manage all of your fundraising campaigns</p>
+          </div>
+          <Link href="/recipient/create">
+            <Button>
+              <HugeiconsIcon icon={Add01Icon} className="w-5 h-5" />
+              New Campaign
+            </Button>
+          </Link>
+        </div>
+        <Card className="border-destructive bg-destructive/5">
+          <CardContent className="py-8">
+            <div className="flex items-center gap-3">
+              <div className="text-destructive text-2xl">⚠️</div>
+              <div>
+                <p className="font-semibold text-destructive">{error}</p>
+                <p className="text-sm text-muted-foreground mt-1">Please refresh the page or contact support if the problem persists.</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const activeCount = myCampaigns.filter(c => c.status === 'approved' || c.status === 'pending_admin').length;
   const completedCount = myCampaigns.filter(c => c.status === 'completed').length;

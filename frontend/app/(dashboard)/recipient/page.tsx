@@ -1,16 +1,59 @@
 'use client';
 
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { Add01Icon, File02Icon } from '@hugeicons/core-free-icons';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { mockCampaigns } from '@/lib/mock-data';
 import { StatsCard } from '@/components/shared/stats-card';
+import { api } from '@/lib/api';
 
 export default function RecipientDashboard() {
-  const myCampaigns = mockCampaigns.filter(c => c.status !== 'rejected').slice(0, 1);
+  const [myCampaigns, setMyCampaigns] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchCampaigns() {
+      try {
+        setError(null);
+        const data = await api.getRecipientCampaigns();
+        setMyCampaigns((data.campaigns || []).filter((c: any) => c.status !== 'rejected'));
+      } catch (err) {
+        console.error('Failed to fetch campaigns:', err);
+        setError('Failed to load campaigns. Please try again later.');
+        setMyCampaigns([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchCampaigns();
+  }, []);
+
+  if (error) {
+    return (
+      <div className="max-w-6xl">
+        <div className="mb-8">
+          <h1 className="font-heading text-3xl font-bold text-foreground mb-2">Welcome back!</h1>
+          <p className="text-muted-foreground">Here's your campaign overview</p>
+        </div>
+        <Card className="border-destructive bg-destructive/5">
+          <CardContent className="py-8">
+            <div className="flex items-center gap-3">
+              <div className="text-destructive text-2xl">⚠️</div>
+              <div>
+                <p className="font-semibold text-destructive">{error}</p>
+                <p className="text-sm text-muted-foreground mt-1">Please refresh the page or contact support if the problem persists.</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   const hasActiveCampaign = myCampaigns.length > 0;
   const totalRaised = myCampaigns.reduce((sum, c) => sum + (c.amountRaised || c.raisedAmount), 0);
   const totalTarget = myCampaigns.reduce((sum, c) => sum + c.targetAmount, 0);
@@ -39,9 +82,11 @@ export default function RecipientDashboard() {
           <CardDescription>View and manage your fundraising campaign</CardDescription>
         </CardHeader>
         <CardContent>
-          {hasActiveCampaign ? (
+          {loading ? (
+            <p className="text-muted-foreground">Loading campaigns...</p>
+          ) : hasActiveCampaign ? (
             <div className="space-y-4">
-              {myCampaigns.map((campaign) => {
+              {myCampaigns.slice(0, 1).map((campaign) => {
                 const raised = campaign.amountRaised || campaign.raisedAmount || 0;
                 const progress = (raised / campaign.targetAmount) * 100;
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { HugeiconsIcon } from '@hugeicons/react';
@@ -8,12 +8,35 @@ import { ArrowLeft02Icon, File02Icon, SecurityCheckIcon } from '@hugeicons/core-
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { mockCampaigns } from '@/lib/mock-data';
 import { toast } from 'sonner';
+import { api } from '@/lib/api';
 
 export default function RecipientCampaignPage() {
   const router = useRouter();
-  const campaign = mockCampaigns.find((c) => c.status === 'approved' || c.status === 'pending_admin');
+  const [campaign, setCampaign] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchCampaigns() {
+      try {
+        setError(null);
+        const data = await api.getRecipientCampaigns();
+        const activeCampaign = (data.campaigns || []).find((c: any) => c.status === 'approved' || c.status === 'pending_admin');
+        if (!activeCampaign) {
+          setError('No active campaign found. Create a new campaign to get started.');
+        }
+        setCampaign(activeCampaign || null);
+      } catch (err) {
+        console.error('Failed to fetch campaigns:', err);
+        setError('Failed to load campaign. Please try again later.');
+        setCampaign(null);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchCampaigns();
+  }, []);
 
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState('');
@@ -23,6 +46,38 @@ export default function RecipientCampaignPage() {
     description: '',
     targetAmount: 0,
   });
+
+  if (loading) {
+    return (
+      <div className="max-w-4xl mx-auto py-12">
+        <div className="text-center">
+          <p className="text-muted-foreground">Loading campaign...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-4xl mx-auto py-12">
+        <Button variant="ghost" size="sm" className="mb-6" onClick={() => router.back()}>
+          <HugeiconsIcon icon={ArrowLeft02Icon} className="w-4 h-4" />
+          Back
+        </Button>
+        <Card className="border-destructive bg-destructive/5">
+          <CardContent className="py-8">
+            <div className="flex items-center gap-3">
+              <div className="text-destructive text-2xl">⚠️</div>
+              <div>
+                <p className="font-semibold text-destructive">{error}</p>
+                <p className="text-sm text-muted-foreground mt-1">Please refresh the page or go back and try again.</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (!campaign) {
     return (
@@ -231,7 +286,7 @@ export default function RecipientCampaignPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            {campaign.documents?.map((doc, idx) => (
+            {campaign.documents?.map((doc: { name: string; type: string }, idx: number) => (
               <div key={idx} className="flex items-center justify-between p-3 border border-border rounded-lg">
                 <div className="flex items-center gap-3">
                   <HugeiconsIcon icon={File02Icon} className="w-5 h-5 text-muted-foreground" strokeWidth={1.5} />

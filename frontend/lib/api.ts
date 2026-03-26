@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://102.37.146.242/api/v1';
 
 interface FetchOptions extends RequestInit {
   token?: string;
@@ -96,6 +96,12 @@ export const api = {
       { token: getToken() || undefined }
     );
   },
+
+  getRecipientCampaigns: (page = 1, limit = 20) =>
+    fetchApi<{ campaigns: any[]; total: number }>(
+      `/campaigns/current-user?page=${page}&limit=${limit}`,
+      { token: getToken() || undefined }
+    ),
 
   createCampaign: (data: {
     title: string;

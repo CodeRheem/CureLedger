@@ -7,7 +7,7 @@ import { ArrowRight02Icon } from '@hugeicons/core-free-icons';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { mockCampaigns } from '@/lib/mock-data';
+// import { mockCampaigns } from '@/lib/mock-data';
 import { StatsCard } from '@/components/shared/stats-card';
 import { api } from '@/lib/api';
 
@@ -15,6 +15,7 @@ export default function AdminDashboardPage() {
   const [stats, setStats] = useState<any>(null);
   const [pendingCampaigns, setPendingCampaigns] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -27,7 +28,7 @@ export default function AdminDashboardPage() {
         setPendingCampaigns(campaignsData.campaigns || []);
       } catch (err) {
         console.error('Failed to fetch admin data:', err);
-        setPendingCampaigns(mockCampaigns.filter(c => c.status === 'pending_admin'));
+        setError('Failed to load dashboard data');
       } finally {
         setLoading(false);
       }

@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { mockCampaigns } from '@/lib/mock-data';
+// import { mockCampaigns } from '@/lib/mock-data';
 import { api } from '@/lib/api';
 
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&h=600&fit=crop';
@@ -33,7 +33,7 @@ export default function BrowseCampaigns() {
       } catch (err) {
         console.error('Failed to fetch campaigns:', err);
         setError('Failed to load campaigns');
-        setCampaigns(mockCampaigns);
+        // setCampaigns(mockCampaigns);
       } finally {
         setLoading(false);
       }
@@ -143,6 +143,17 @@ export default function BrowseCampaigns() {
                   </div>
                 </div>
               ))}
+            </div>
+          ) : error ? (
+            <div className="text-center py-20">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-50 flex items-center justify-center">
+                <HugeiconsIcon icon={Search01Icon} className="w-8 h-8 text-red-500" strokeWidth={1.5} />
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-2">Something went wrong</h3>
+              <p className="text-muted-foreground mb-6">{error}</p>
+              <Button onClick={() => window.location.reload()}>
+                Try Again
+              </Button>
             </div>
           ) : filtered.length === 0 ? (
             <div className="text-center py-20">

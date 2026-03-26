@@ -151,7 +151,7 @@ export default function RecipientWithdrawalsPage() {
       <div className="grid gap-4 md:grid-cols-3 mb-8">
         <StatsCard label="Total Withdrawn" value={`₦${totalWithdrawn.toLocaleString()}`} />
         <StatsCard label="Pending" value={`₦${pendingAmount.toLocaleString()}`} />
-        <StatsCard label="Available Balance" value="₦1,350,000" />
+        <StatsCard label="Available Balance" value={'N200'} />
       </div>
 
       <Card className="border-border">

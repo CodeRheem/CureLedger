@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { mockCampaigns } from '@/lib/mock-data';
+// import { mockCampaigns } from '@/lib/mock-data';
 import { api } from '@/lib/api';
 
 export default function CampaignDetail() {
@@ -34,8 +34,7 @@ export default function CampaignDetail() {
       } catch (err) {
         console.error('Failed to fetch campaign:', err);
         setError('Failed to load campaign');
-        const fallback = mockCampaigns.find((c) => c.id === campaignId);
-        setCampaign(fallback || null);
+        setCampaign(null);
       } finally {
         setLoading(false);
       }
@@ -56,14 +55,15 @@ export default function CampaignDetail() {
     );
   }
 
-  if (!campaign) {
+  if (error || !campaign) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full empty-state-bg flex items-center justify-center">
-            <HugeiconsIcon icon={Search01Icon} className="w-8 h-8 empty-state-icon" strokeWidth={1.5} />
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-50 flex items-center justify-center">
+            <HugeiconsIcon icon={Search01Icon} className="w-8 h-8 text-red-500" strokeWidth={1.5} />
           </div>
           <h1 className="text-2xl font-heading font-bold mb-4">Campaign Not Found</h1>
+          <p className="text-muted-foreground mb-4">{error || 'This campaign may have been removed'}</p>
           <Link href="/campaigns">
             <Button>Back to Campaigns</Button>
           </Link>

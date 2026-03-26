@@ -1,22 +1,69 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
+import { api } from '@/lib/api';
+import { toast } from 'sonner';
 
-const mockHospitals = [
-  { id: '1', name: 'Lagos General Hospital', license: 'HOSP/2024/12345', contact: 'Lagos', verified: 12, status: 'Approved' },
-  { id: '2', name: 'Abuja Medical Centre', license: 'HOSP/2024/54321', contact: 'Abuja', verified: 8, status: 'Approved' },
-  { id: '3', name: 'Kano Healthcare', license: 'HOSP/2024/99999', contact: 'Kano', verified: 0, status: 'Pending' },
-];
+interface HospitalRow {
+  id: string;
+  name: string;
+  license: string;
+  contact: string;
+  verified: number;
+  status: 'Approved' | 'Pending';
+}
 
 export default function AdminHospitalsPage() {
   const [search, setSearch] = useState('');
+  const [hospitals, setHospitals] = useState<HospitalRow[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredHospitals = mockHospitals.filter(h => 
+  useEffect(() => {
+    async function fetchHospitals() {
+      try {
+        const data = await api.getAdminHospitals();
+        setHospitals(
+          (data.hospitals || []).map((hospital: any) => ({
+            id: hospital._id || hospital.id,
+            name: hospital.hospitalName || hospital.name || 'Hospital',
+            license: hospital.hospitalLicense || hospital.license || '-',
+            contact: hospital.address || hospital.contact || '-',
+            verified: hospital.verifiedCases || 0,
+            status: hospital.verified ? 'Approved' : 'Pending'
+          }))
+        );
+      } catch (error) {
+        console.error('Failed to load hospitals:', error);
+        toast.error('Failed to load hospitals');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchHospitals();
+  }, []);
+
+  const handleVerifyHospital = async (hospitalId: string) => {
+    try {
+      await api.verifyHospital(hospitalId);
+      setHospitals((prev) => prev.map((hospital) => (
+        hospital.id === hospitalId
+          ? { ...hospital, status: 'Approved' }
+          : hospital
+      )));
+      toast.success('Hospital verified successfully');
+    } catch (error) {
+      console.error('Failed to verify hospital:', error);
+      toast.error('Failed to verify hospital');
+    }
+  };
+
+  const filteredHospitals = hospitals.filter(h =>
     h.name.toLowerCase().includes(search.toLowerCase()) ||
     h.license.toLowerCase().includes(search.toLowerCase()) ||
     h.contact.toLowerCase().includes(search.toLowerCase())
@@ -56,6 +103,13 @@ export default function AdminHospitalsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
+              {loading && (
+                <TableRow>
+                  <td colSpan={6} className="text-center text-muted-foreground py-8">
+                    Loading hospitals...
+                  </td>
+                </TableRow>
+              )}
               {filteredHospitals.map((hospital) => (
                 <TableRow key={hospital.id}>
                   <TableCell className="font-medium">{hospital.name}</TableCell>
@@ -70,7 +124,17 @@ export default function AdminHospitalsPage() {
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Button variant="ghost" size="sm">View</Button>
-                      <Button variant="ghost" size="sm" className="btn-danger-ghost">Revoke</Button>
+                      {hospital.status === 'Pending' ? (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleVerifyHospital(hospital.id)}
+                        >
+                          Verify
+                        </Button>
+                      ) : (
+                        <Button variant="ghost" size="sm" className="btn-danger-ghost">Revoke</Button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>

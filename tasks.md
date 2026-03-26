@@ -19,7 +19,7 @@
 - [x] Integrate hospital verify detail page with verify/reject APIs.
 - [x] Integrate admin approvals actions with approve/reject APIs.
 - [x] Integrate recipient withdrawals page with list/request APIs.
-- [ ] Integrate admin recipients/hospitals/audit logs pages with backend APIs.
+- [x] Integrate admin recipients/hospitals/audit logs pages with backend APIs.
 - [ ] Remove mock fallback pathways from critical action flows.
 - [ ] Align frontend error parsing with backend statusCode/message/data envelope.
 

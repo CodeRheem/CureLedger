@@ -1,4 +1,4 @@
-# TODO
+<!-- # TODO
 
 ## Backend - Missing Endpoints (7 items - COMMENTED OUT, AWAITING REVIEW)
 
@@ -26,4 +26,5 @@ All 7 endpoints have been implemented but commented out for backend dev review:
 - [x] Modify admin approval - detailed modal with campaign details, recipient info, hospital info, documents, AI confidence
 - [x] Refactor responsiveness - added mobile menu to header, fixed icons in layouts, improved login page
 
-# Completed items removed from previous list
+# Completed items removed from previous list -->
+

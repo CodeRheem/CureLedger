@@ -82,19 +82,20 @@ export default function HospitalPatientsPage() {
               <TableBody>
                 {patients.map((patient, i) => (
                   <TableRow key={i}>
-                  <TableCell className="font-medium">{patient.name}</TableCell>
-                  <TableCell>{patient.condition}</TableCell>
-                  <TableCell>{patient.campaign}</TableCell>
-                  <TableCell>{patient.date}</TableCell>
-                  <TableCell>
-                    <Badge className={patient.status === 'Approved' ? 'badge-success' : 'badge-warning'}>
-                      {patient.status}
-                    </Badge>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                    <TableCell className="font-medium">{patient.name}</TableCell>
+                    <TableCell>{patient.condition}</TableCell>
+                    <TableCell>{patient.campaign}</TableCell>
+                    <TableCell>{patient.date}</TableCell>
+                    <TableCell>
+                      <Badge className={patient.status === 'Approved' ? 'badge-success' : 'badge-warning'}>
+                        {patient.status}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </div>

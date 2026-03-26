@@ -40,3 +40,4 @@ All 7 endpoints have been implemented but commented out for backend dev review:
 # Backend
 
 [] return user's available balance ( linked to the withdrawals page)
+[] in /hospital/history return pending reviews ( to be used in line 108 )

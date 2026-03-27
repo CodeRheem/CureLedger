@@ -8,7 +8,6 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
-import { Be_Vietnam_Pro } from 'next/font/google';
 
 interface ProfileStatus {
   complete: boolean;

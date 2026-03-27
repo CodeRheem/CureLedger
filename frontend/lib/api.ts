@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://102.37.146.242/api/v1';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://cureledger.campuscart.com.ng';
 
 interface FetchOptions extends RequestInit {
   token?: string;

@@ -16,6 +16,7 @@ import { api } from '@/lib/api';
 export default function AdminApprovalsPage() {
   const [approvals, setApprovals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedApproval, setSelectedApproval] = useState<ApprovalItem | null>(null);
   const [showModal, setShowModal] = useState(false);
@@ -28,7 +29,7 @@ export default function AdminApprovalsPage() {
         const data = await api.getPendingCampaigns('pending_admin');
         setApprovals((data.campaigns || []).map((campaign: any, idx: number) => ({
           id: `approval-${idx}`,
-          campaignId: campaign.id,
+          campaignId: campaign._id || campaign.id,
           title: campaign.title,
           recipientName: campaign.recipientName || campaign.recipient?.firstName + ' ' + campaign.recipient?.lastName,
           hospitalName: campaign.hospitalName || campaign.hospital?.hospitalName,
@@ -50,21 +51,48 @@ export default function AdminApprovalsPage() {
     fetchPendingCampaigns();
   }, []);
 
-  const handleApproval = (id: string, action: 'approve' | 'reject', override = false) => {
-    setApprovals((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? {
-            ...item,
-            status: action === 'approve' ? 'approved' : 'rejected',
-            overrideReason: override ? overrideReason : undefined,
-          }
-          : item
-      )
-    );
-    setShowModal(false);
-    setSelectedApproval(null);
-    setOverrideReason('');
+  const handleApproval = async (id: string, action: 'approve' | 'reject', override = false) => {
+    if (!selectedApproval?.campaignId) {
+      return;
+    }
+
+    try {
+      setActionLoading(true);
+
+      if (action === 'approve') {
+        await api.approveCampaign(
+          selectedApproval.campaignId,
+          true,
+          override ? overrideReason : undefined
+        );
+      } else {
+        await api.rejectCampaign(
+          selectedApproval.campaignId,
+          overrideReason || 'Rejected by admin'
+        );
+      }
+
+      setApprovals((prev) =>
+        prev.map((item) =>
+          item.id === id
+            ? {
+                ...item,
+                status: action === 'approve' ? 'approved' : 'rejected',
+                overrideReason: override ? overrideReason : undefined,
+              }
+            : item
+        )
+      );
+
+      setShowModal(false);
+      setSelectedApproval(null);
+      setOverrideReason('');
+    } catch (err) {
+      console.error('Failed to process approval decision:', err);
+      setError('Failed to process decision. Please try again.');
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   const getConfidenceColor = (score: number) => {
@@ -293,15 +321,17 @@ export default function AdminApprovalsPage() {
               <Button
                 onClick={() => handleApproval(selectedApproval.id, 'approve', selectedApproval.aiConfidence < 95)}
                 className="flex-1 bg-green-600 hover:bg-green-700"
+                disabled={actionLoading}
               >
-                Approve Campaign
+                {actionLoading ? 'Processing...' : 'Approve Campaign'}
               </Button>
               <Button
                 variant="outline"
                 onClick={() => handleApproval(selectedApproval.id, 'reject')}
                 className="flex-1 text-red-600 border-red-200 hover:bg-red-50"
+                disabled={actionLoading}
               >
-                Reject
+                {actionLoading ? 'Processing...' : 'Reject'}
               </Button>
               <Button variant="ghost" onClick={() => setShowModal(false)}>
                 Cancel

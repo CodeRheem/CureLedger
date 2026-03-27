@@ -1,10 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { StatsCard } from '@/components/shared/stats-card';
+import { Input } from '@/components/ui/input';
+import { api } from '@/lib/api';
+import { toast } from 'sonner';
 
 interface AuditLog {
   id: string;
@@ -17,94 +20,42 @@ interface AuditLog {
   ip: string;
 }
 
-const mockLogs: AuditLog[] = [
-  {
-    id: '1',
-    action: 'APPROVE_CAMPAIGN',
-    user: 'Admin User',
-    role: 'admin',
-    target: 'Kidney Transplant Surgery',
-    details: 'Campaign approved after review',
-    timestamp: '2024-03-01 14:30:22',
-    ip: '192.168.1.100',
-  },
-  {
-    id: '2',
-    action: 'REJECT_CAMPAIGN',
-    user: 'Admin User',
-    role: 'admin',
-    target: 'Spinal Surgery Fund',
-    details: 'Incomplete documentation',
-    timestamp: '2024-03-01 12:15:10',
-    ip: '192.168.1.100',
-  },
-  {
-    id: '3',
-    action: 'VERIFY_HOSPITAL',
-    user: 'Admin User',
-    role: 'admin',
-    target: 'Kano Healthcare',
-    details: 'Hospital license verified',
-    timestamp: '2024-02-28 10:45:33',
-    ip: '192.168.1.100',
-  },
-  {
-    id: '4',
-    action: 'PROCESS_WITHDRAWAL',
-    user: 'Admin User',
-    role: 'admin',
-    target: 'Jane Smith',
-    details: 'Withdrawal of ₦500,000 processed',
-    timestamp: '2024-02-28 09:20:15',
-    ip: '192.168.1.100',
-  },
-  {
-    id: '5',
-    action: 'CREATE_ADMIN',
-    user: 'Super Admin',
-    role: 'admin',
-    target: 'New Admin',
-    details: 'New admin account created',
-    timestamp: '2024-02-27 16:00:00',
-    ip: '192.168.1.50',
-  },
-  {
-    id: '6',
-    action: 'UPDATE_SETTINGS',
-    user: 'Admin User',
-    role: 'admin',
-    target: 'System',
-    details: 'Platform commission changed to 5%',
-    timestamp: '2024-02-27 11:30:45',
-    ip: '192.168.1.100',
-  },
-  {
-    id: '7',
-    action: 'SUSPEND_RECIPIENT',
-    user: 'Admin User',
-    role: 'admin',
-    target: 'John Doe',
-    details: 'Account suspended due to policy violation',
-    timestamp: '2024-02-26 14:22:18',
-    ip: '192.168.1.100',
-  },
-  {
-    id: '8',
-    action: 'DIVERT_FUNDS',
-    user: 'Admin User',
-    role: 'admin',
-    target: 'Campaign #123',
-    details: '₦200,000 diverted to Emergency Fund',
-    timestamp: '2024-02-25 09:15:00',
-    ip: '192.168.1.100',
-  },
-];
-
 export default function AdminAuditLogsPage() {
+  const [logs, setLogs] = useState<AuditLog[]>([]);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('all');
   const [search, setSearch] = useState('');
 
-  const filteredLogs = mockLogs.filter((log) => {
+  useEffect(() => {
+    async function fetchLogs() {
+      try {
+        const data = await api.getAuditLogs();
+        setLogs(
+          (data.logs || []).map((log: any) => ({
+            id: String(log.id || log._id),
+            action: String(log.action || log.type || 'ACTION').toUpperCase(),
+            user: log.performedBy
+              ? `${log.performedBy.firstName || ''} ${log.performedBy.lastName || ''}`.trim() || log.performedBy.email || 'System'
+              : 'System',
+            role: String(log.role || 'admin'),
+            target: log.targetName || String(log.targetId || 'Unknown'),
+            details: log.notes || `${String(log.type || '').replace(/_/g, ' ')} event`,
+            timestamp: log.createdAt ? new Date(log.createdAt).toLocaleString() : '-',
+            ip: 'N/A'
+          }))
+        );
+      } catch (error) {
+        console.error('Failed to load audit logs:', error);
+        toast.error('Failed to load audit logs');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchLogs();
+  }, []);
+
+  const filteredLogs = logs.filter((log) => {
     const matchesFilter = filter === 'all' || log.action.includes(filter);
     const matchesSearch =
       search === '' ||
@@ -127,7 +78,10 @@ export default function AdminAuditLogsPage() {
     return <Badge variant="outline">{action}</Badge>;
   };
 
-  const actionTypes = ['all', 'APPROVE_CAMPAIGN', 'REJECT_CAMPAIGN', 'VERIFY_HOSPITAL', 'PROCESS_WITHDRAWAL', 'CREATE_ADMIN', 'SUSPEND_RECIPIENT', 'DIVERT_FUNDS'];
+  const actionTypes = useMemo(() => {
+    const types = Array.from(new Set(logs.map((log) => log.action)));
+    return ['all', ...types];
+  }, [logs]);
 
   return (
     <div className="max-w-6xl">
@@ -137,15 +91,15 @@ export default function AdminAuditLogsPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-4 mb-8">
-        <StatsCard label="Total Actions" value={mockLogs.length} />
-        <StatsCard label="Approvals" value={mockLogs.filter((l) => l.action.includes('APPROVE')).length} />
+        <StatsCard label="Total Actions" value={logs.length} />
+        <StatsCard label="Approvals" value={logs.filter((l) => l.action.includes('APPROVE')).length} />
         <StatsCard
           label="Rejections"
-          value={mockLogs.filter((l) => l.action.includes('REJECT') || l.action.includes('SUSPEND')).length}
+          value={logs.filter((l) => l.action.includes('REJECT') || l.action.includes('SUSPEND')).length}
         />
         <StatsCard
           label="Fund Movements"
-          value={mockLogs.filter((l) => l.action.includes('WITHDRAW') || l.action.includes('DIVERT')).length}
+          value={logs.filter((l) => l.action.includes('WITHDRAW') || l.action.includes('DIVERT')).length}
         />
       </div>
 
@@ -154,12 +108,10 @@ export default function AdminAuditLogsPage() {
           <div className="flex items-center justify-between">
             <CardTitle className="font-heading">Activity Log</CardTitle>
             <div className="flex gap-2">
-              <input
-                type="text"
+              <Input
                 placeholder="Search logs..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="px-3 py-2 border border-input rounded-md text-sm"
               />
             </div>
           </div>
@@ -180,6 +132,9 @@ export default function AdminAuditLogsPage() {
           </div>
 
           <div className="space-y-3">
+            {loading && (
+              <div className="text-center text-muted-foreground py-8">Loading audit logs...</div>
+            )}
             {filteredLogs.map((log) => (
               <div key={log.id} className="flex items-start justify-between p-4 border border-border rounded-lg">
                 <div className="flex-1">

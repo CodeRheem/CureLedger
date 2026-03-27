@@ -6,11 +6,15 @@ interface FetchOptions extends RequestInit {
 
 async function fetchApi<T>(endpoint: string, options: FetchOptions = {}): Promise<T> {
   const { token, ...fetchOptions } = options;
+  const isFormData = typeof FormData !== 'undefined' && fetchOptions.body instanceof FormData;
 
   const headers: HeadersInit = {
-    'Content-Type': 'application/json',
     ...(options.headers || {}),
   };
+
+  if (!isFormData && !(headers as Record<string, string>)['Content-Type']) {
+    (headers as Record<string, string>)['Content-Type'] = 'application/json';
+  }
 
   if (token) {
     (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
@@ -30,7 +34,11 @@ async function fetchApi<T>(endpoint: string, options: FetchOptions = {}): Promis
       error = { message: response.statusText || 'An error occurred' };
     }
 
-    const errorMessage = error.message || error.error || `HTTP error! status: ${response.status}`;
+    const errorMessage =
+      error.message ||
+      error.error?.message ||
+      error.error ||
+      `HTTP error! status: ${response.status}`;
     const customError = new Error(errorMessage);
     (customError as any).statusCode = response.status;
     (customError as any).fullResponse = error;
@@ -174,9 +182,21 @@ export const api = {
 
   getVerificationHistory: (page = 1, limit = 20) =>
     fetchApi<{ verifications: any[]; total: number }>(
-      `/campaigns/verifications/history?page=${page}&limit=${limit}`,
+      `/campaigns/history?page=${page}&limit=${limit}`,
       { token: getToken() || undefined }
     ),
+
+  uploadCampaignDocument: (campaignId: string, file: File, type: string) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('type', type);
+
+    return fetchApi<any>(`/campaigns/${campaignId}/documents`, {
+      method: 'POST',
+      body: formData,
+      token: getToken() || undefined,
+    });
+  },
 
   // Donations
   donate: (data: {
@@ -200,7 +220,7 @@ export const api = {
   // Withdrawals
   getWithdrawals: (page = 1, limit = 20) =>
     fetchApi<{ withdrawals: any[]; total: number }>(
-      `/withdrawals?page=${page}&limit=${limit}`,
+      `/withdraw?page=${page}&limit=${limit}`,
       { token: getToken() || undefined }
     ),
 
@@ -260,4 +280,21 @@ export const api = {
       { token: getToken() || undefined }
     );
   },
+
+  initiatePayment: (data: {
+    amount: number;
+    currency?: string;
+    customerEmail: string;
+    customerName: string;
+    reference: string;
+    callbackUrl?: string;
+    metadata?: Record<string, unknown>;
+  }) =>
+    fetchApi<any>('/payments/initiate', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  getPaymentStatus: (reference: string) =>
+    fetchApi<any>(`/payments/${reference}`),
 };

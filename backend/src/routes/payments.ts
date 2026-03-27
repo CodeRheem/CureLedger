@@ -5,7 +5,8 @@ import { ApiError } from '@core/ApiError';
 import { ApiResponse } from '@core/ApiResponse';
 import { asyncHandler } from '@helpers/asyncHandler';
 import { validateRequest } from '@helpers/validateRequest';
-import { EmailService } from '@services/EmailService';
+import { DonationRepo } from '@database/repository/DonationRepo';
+import { DonationService } from '@services/DonationService';
 
 const router = Router();
 
@@ -49,7 +50,9 @@ router.get(
   validateRequest(paymentReferenceSchema),
   asyncHandler(async (req: Request, res: Response) => {
     try {
-      const payment = await PaymentService.getPaymentStatus(req.params.reference);
+      const donation = await DonationRepo.findByPaymentReference(req.params.reference);
+      const amountInMinorUnits = donation ? Math.round(donation.amount * 100) : undefined;
+      const payment = await PaymentService.getPaymentStatus(req.params.reference, amountInMinorUnits);
       ApiResponse.ok(res, 'Payment status fetched', payment);
     } catch (error) {
       if (error instanceof ApiError) {
@@ -64,23 +67,52 @@ router.get(
 router.post(
   '/webhook',
   asyncHandler(async (req: Request, res: Response) => {
-    // const signature = String(req.headers['x-signature'] || '');
-    // const isValid = PaymentService.verifyWebhookSignature(signature, JSON.stringify(req.body));
+    const signature = String(
+      req.headers['x-interswitch-signature'] || req.headers['x-signature'] || ''
+    );
+    const rawPayload = req.body ? JSON.stringify(req.body) : '';
+    const isValid = PaymentService.verifyWebhookSignature(signature, rawPayload);
 
-    // if (!isValid) {
-    //   res.status(401).json(ApiError.unauthorized('Invalid webhook signature').toResponse());
-    //   return;
-    // }
+    if (!isValid) {
+      res.status(401).json(ApiError.unauthorized('Invalid webhook signature').toResponse());
+      return;
+    }
 
-    const body_text = req.body ? JSON.stringify(req.body) : 'No payload';
-    const headers_text = JSON.stringify(req.headers);
-    const text = `Webhook received:\nHeaders: ${headers_text}\nBody: ${body_text}`;
+    const reference =
+      req.body?.paymentReference ||
+      req.body?.transactionReference ||
+      req.body?.txn_ref ||
+      req.body?.reference;
 
+    const transactionId = req.body?.transactionId || req.body?.paymentId;
 
-    EmailService.sendMail({to:'rajisherifdeen39@gmail.com', subject:'Webhook Received', text });
-    
+    if (!reference) {
+      throw ApiError.validation('Missing payment reference in webhook payload');
+    }
 
-    ApiResponse.ok(res, 'Webhook received', { received: true });
+    const donation = await DonationRepo.findByPaymentReference(String(reference));
+    if (!donation) {
+      throw ApiError.notFound('Donation not found for webhook reference');
+    }
+
+    const status = await PaymentService.getPaymentStatus(String(reference), Math.round(donation.amount * 100));
+
+    if (!status.isSuccessful) {
+      ApiResponse.ok(res, 'Webhook received - payment not successful', {
+        received: true,
+        processed: false,
+        reference
+      });
+      return;
+    }
+
+    await DonationService.confirmDonation(String(reference), transactionId ? String(transactionId) : undefined);
+
+    ApiResponse.ok(res, 'Webhook received and processed', {
+      received: true,
+      processed: true,
+      reference
+    });
   })
 );
 

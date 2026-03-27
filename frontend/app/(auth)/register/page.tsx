@@ -6,15 +6,18 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { api } from '@/lib/api';
 
 export default function RegisterPage() {
   const [step, setStep] = useState(1);
   const [role, setRole] = useState<'recipient' | 'hospital'>('recipient');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
+    location: '',
     password: '',
     confirmPassword: '',
     hospitalName: '',
@@ -25,20 +28,59 @@ export default function RegisterPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (isSubmitting) {
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       toast.error('Passwords do not match');
       return;
     }
 
-    localStorage.setItem('userRole', role);
-    localStorage.setItem('userEmail', formData.email);
-    localStorage.setItem('userName', `${formData.firstName} ${formData.lastName}`);
-    document.cookie = `userRole=${role}; path=/; max-age=${60 * 60 * 24 * 30}`;
+    try {
+      setIsSubmitting(true);
 
-    if (role === 'recipient') window.location.href = '/recipient';
-    else window.location.href = '/hospital';
+      const response = role === 'recipient'
+        ? await api.registerRecipient({
+            email: formData.email,
+            password: formData.password,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            phone: formData.phone,
+            location: formData.location,
+          })
+        : await api.registerHospital({
+            email: formData.email,
+            password: formData.password,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            phone: formData.phone,
+            hospitalName: formData.hospitalName,
+            hospitalLicense: formData.hospitalLicense,
+          });
+
+      localStorage.setItem('authToken', response.token);
+      localStorage.setItem('userRole', response.user.role || role);
+      localStorage.setItem('userEmail', response.user.email || formData.email);
+      localStorage.setItem('userName', `${response.user.firstName || formData.firstName} ${response.user.lastName || formData.lastName}`);
+      document.cookie = `userRole=${response.user.role || role}; path=/; max-age=${60 * 60 * 24 * 30}`;
+
+      toast.success('Account created successfully');
+
+      if ((response.user.role || role) === 'recipient') {
+        window.location.href = '/recipient';
+      } else {
+        window.location.href = '/hospital';
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Registration failed';
+      toast.error(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const benefits = [
@@ -173,6 +215,18 @@ export default function RegisterPage() {
                     required
                     label="Phone Number"
                   />
+
+                  {role === 'recipient' && (
+                    <Input
+                      type="text"
+                      name="location"
+                      placeholder="Lagos, Nigeria"
+                      value={formData.location}
+                      onChange={handleChange}
+                      required
+                      label="Location"
+                    />
+                  )}
                 </div>
 
                 {/* Hospital-Specific Fields */}
@@ -244,8 +298,9 @@ export default function RegisterPage() {
                     type="submit"
                     className="flex-1"
                     size="lg"
+                    disabled={isSubmitting}
                   >
-                    Create Account
+                    {isSubmitting ? 'Creating Account...' : 'Create Account'}
                   </Button>
                 </div>
               </>

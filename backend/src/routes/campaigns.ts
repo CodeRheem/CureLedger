@@ -1,7 +1,13 @@
 import { Router, Request, Response } from 'express';
 import Joi from 'joi';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
 import { CampaignService } from '@services/CampaignService';
 import { DonationService } from '@services/DonationService';
+import { CampaignRepo } from '@database/repository/CampaignRepo';
+import { CampaignDocumentRepo } from '@database/repository/CampaignDocumentRepo';
+import { DocumentType, AnalysisRecommendation } from '@database/model/CampaignDocument';
 import { ApiError } from '@core/ApiError';
 import { ApiResponse } from '@core/ApiResponse';
 import { asyncHandler } from '@helpers/asyncHandler';
@@ -9,6 +15,7 @@ import { validateRequest } from '@helpers/validateRequest';
 import { authenticate } from '@middlewares/authenticate';
 import { authorize } from '@middlewares/authorize';
 import { UserRole } from '@database/model/User';
+import { Types } from 'mongoose';
 
 const router = Router();
 
@@ -30,6 +37,26 @@ const updateCampaignSchema = Joi.object({
     description: Joi.string().min(20).optional(),
     endsAt: Joi.date().optional()
   })
+});
+
+const uploadRoot = path.join(process.cwd(), 'uploads', 'campaign-documents');
+if (!fs.existsSync(uploadRoot)) {
+  fs.mkdirSync(uploadRoot, { recursive: true });
+}
+
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => cb(null, uploadRoot),
+    filename: (_req, file, cb) => {
+      const ext = path.extname(file.originalname || '').toLowerCase();
+      cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`);
+    }
+  }),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    const allowedMimeTypes = ['application/pdf', 'image/jpeg', 'image/png'];
+    cb(null, allowedMimeTypes.includes(file.mimetype));
+  }
 });
 
 // GET /campaigns - Public list approved campaigns
@@ -187,6 +214,67 @@ router.patch(
 
       const campaign = await CampaignService.updateCampaign(req.params.id, req.user.userId, req.body);
       ApiResponse.ok(res, 'Campaign updated successfully', campaign);
+    } catch (error) {
+      if (error instanceof ApiError) {
+        res.status(error.getHttpStatus()).json(error.toResponse());
+      } else {
+        throw error;
+      }
+    }
+  })
+);
+
+// POST /campaigns/:id/documents - Upload campaign medical document
+router.post(
+  '/:id/documents',
+  authenticate,
+  authorize(UserRole.RECIPIENT),
+  upload.single('file'),
+  asyncHandler(async (req: Request, res: Response) => {
+    try {
+      if (!req.user) {
+        throw ApiError.unauthorized();
+      }
+
+      const campaign = await CampaignRepo.findById(req.params.id);
+      if (!campaign) {
+        throw ApiError.notFound('Campaign not found');
+      }
+
+      if (campaign.recipientId.toString() !== req.user.userId) {
+        throw ApiError.forbidden('Can only upload documents for your own campaign');
+      }
+
+      if (!req.file) {
+        throw ApiError.validation('Document file is required');
+      }
+
+      const type = req.body.type as DocumentType;
+      if (!Object.values(DocumentType).includes(type)) {
+        throw ApiError.validation('Invalid document type');
+      }
+
+      const document = await CampaignDocumentRepo.create({
+        campaignId: new Types.ObjectId(req.params.id),
+        type,
+        url: `/uploads/campaign-documents/${req.file.filename}`
+      });
+
+      await CampaignDocumentRepo.updateAnalysis(document._id, {
+        aiScore: 0.85,
+        flags: [],
+        recommendation: AnalysisRecommendation.HUMAN_REVIEW
+      });
+
+      ApiResponse.created(res, 'Document uploaded successfully', {
+        id: document._id,
+        type: document.type,
+        url: document.url,
+        aiScore: 0.85,
+        flags: [],
+        recommendation: AnalysisRecommendation.HUMAN_REVIEW,
+        uploadedAt: document.uploadedAt
+      });
     } catch (error) {
       if (error instanceof ApiError) {
         res.status(error.getHttpStatus()).json(error.toResponse());

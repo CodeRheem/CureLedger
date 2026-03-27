@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { HugeiconsIcon } from '@hugeicons/react';
@@ -8,7 +8,8 @@ import { ArrowLeft02Icon, CheckmarkCircle02Icon, DocumentAttachmentIcon, Octagon
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { mockCampaigns } from '@/lib/mock-data';
+import { api } from '@/lib/api';
+import { toast } from 'sonner';
 
 interface AIDocumentScore {
   document: string;
@@ -26,10 +27,37 @@ export default function HospitalVerifyPage() {
   const params = useParams();
   const router = useRouter();
   const campaignId = params.id as string;
-  const campaign = mockCampaigns.find((c) => c.id === campaignId);
+  const [campaign, setCampaign] = useState<any | null>(null);
+  const [isLoadingCampaign, setIsLoadingCampaign] = useState(true);
   const [isVerifying, setIsVerifying] = useState(false);
   const [decision, setDecision] = useState<'approve' | 'reject' | null>(null);
   const [notes, setNotes] = useState('');
+
+  useEffect(() => {
+    async function fetchCampaign() {
+      try {
+        const data = await api.getCampaign(campaignId);
+        setCampaign(data);
+      } catch (error) {
+        console.error('Failed to load campaign:', error);
+        setCampaign(null);
+      } finally {
+        setIsLoadingCampaign(false);
+      }
+    }
+
+    if (campaignId) {
+      fetchCampaign();
+    }
+  }, [campaignId]);
+
+  if (isLoadingCampaign) {
+    return (
+      <div className="max-w-4xl mx-auto py-12">
+        <div className="text-center text-muted-foreground">Loading campaign...</div>
+      </div>
+    );
+  }
 
   if (!campaign) {
     return (
@@ -63,12 +91,28 @@ export default function HospitalVerifyPage() {
     return 'bg-red-50 border-red-200';
   };
 
-  const handleVerify = () => {
-    setIsVerifying(true);
-    setTimeout(() => {
-      setIsVerifying(false);
+  const handleVerify = async () => {
+    if (!decision) {
+      return;
+    }
+
+    try {
+      setIsVerifying(true);
+
+      if (decision === 'approve') {
+        await api.verifyCampaign(campaignId, true, notes || undefined);
+      } else {
+        await api.rejectCampaign(campaignId, notes || 'Rejected by hospital');
+      }
+
+      toast.success(`Campaign ${decision === 'approve' ? 'approved' : 'rejected'} successfully`);
       router.push('/hospital');
-    }, 1500);
+    } catch (error) {
+      console.error('Failed to submit verification decision:', error);
+      toast.error('Failed to submit decision. Please try again.');
+    } finally {
+      setIsVerifying(false);
+    }
   };
 
   return (
@@ -98,7 +142,9 @@ export default function HospitalVerifyPage() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Recipient</p>
-                <p className="font-medium text-foreground">{campaign.recipientName}</p>
+                <p className="font-medium text-foreground">
+                  {campaign.recipientName || `${campaign.recipient?.firstName || ''} ${campaign.recipient?.lastName || ''}`.trim()}
+                </p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Medical Condition</p>
@@ -168,12 +214,12 @@ export default function HospitalVerifyPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {campaign.documents?.map((doc, idx) => (
+              {campaign.documents?.map((doc: { name: string; url?: string; type: string }, idx: number) => (
                 <div key={idx} className="flex items-center justify-between p-3 border border-border rounded-lg">
                   <div className="flex items-center gap-3">
                     <HugeiconsIcon icon={DocumentAttachmentIcon} className="w-5 h-5 text-muted-foreground" strokeWidth={1.5} />
-                    <span className="font-medium text-foreground">{doc.name}</span>
-                    <Badge variant="outline">{doc.type}</Badge>
+                    <span className="font-medium text-foreground">{doc.name || doc.url || `Document ${idx + 1}`}</span>
+                    <Badge variant="outline">{doc.type || 'document'}</Badge>
                   </div>
                   <Button variant="ghost" size="sm">
                     View

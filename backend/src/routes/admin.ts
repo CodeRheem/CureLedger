@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import Joi from 'joi';
 import { RecipientRepo } from '@database/repository/RecipientRepo';
 import { HospitalRepo } from '@database/repository/HospitalRepo';
 import { WithdrawalRepo } from '@database/repository/WithdrawalRepo';
@@ -12,10 +13,20 @@ import { UserRole } from '@database/model/User';
 import { ApiError } from '@core/ApiError';
 import { ApiResponse } from '@core/ApiResponse';
 import { asyncHandler } from '@helpers/asyncHandler';
+import { validateRequest } from '@helpers/validateRequest';
 import { authenticate } from '@middlewares/authenticate';
 import { authorize } from '@middlewares/authorize';
 
 const router = Router();
+
+const divertFundsSchema = Joi.object({
+  body: Joi.object({
+    fromCampaignId: Joi.string().required(),
+    toCampaignId: Joi.string().required(),
+    amount: Joi.number().positive().required(),
+    reason: Joi.string().trim().min(3).required()
+  })
+});
 
 // GET /stats - Dashboard statistics (Admin)
 router.get(
@@ -266,6 +277,54 @@ router.get(
       } else {
         throw error;
       }
+    }
+  })
+);
+
+// POST /funds/divert - Divert funds from one campaign to another (Admin)
+router.post(
+  '/funds/divert',
+  authenticate,
+  authorize(UserRole.ADMIN),
+  validateRequest(divertFundsSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    const { fromCampaignId, toCampaignId, amount, reason } = req.body;
+
+    if (fromCampaignId === toCampaignId) {
+      throw ApiError.validation('Source and destination campaigns must be different');
+    }
+
+    const session = await CampaignModel.db.startSession();
+
+    try {
+      await session.withTransaction(async () => {
+        const fromCampaign = await CampaignModel.findById(fromCampaignId).session(session);
+        const toCampaign = await CampaignModel.findById(toCampaignId).session(session);
+
+        if (!fromCampaign || !toCampaign) {
+          throw ApiError.notFound('One or both campaigns were not found');
+        }
+
+        if (fromCampaign.raisedAmount < amount) {
+          throw ApiError.validation('Insufficient source campaign balance for diversion');
+        }
+
+        fromCampaign.raisedAmount -= amount;
+        toCampaign.raisedAmount += amount;
+
+        await fromCampaign.save({ session });
+        await toCampaign.save({ session });
+      });
+
+      ApiResponse.ok(res, 'Funds diverted successfully', {
+        fromCampaignId,
+        toCampaignId,
+        amount,
+        reason,
+        divertedAt: new Date().toISOString()
+      });
+    } finally {
+      await session.endSession();
     }
   })
 );

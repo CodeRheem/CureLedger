@@ -1,22 +1,56 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
+import { api } from '@/lib/api';
+import { toast } from 'sonner';
 
-const mockRecipients = [
-  { id: '1', name: 'Jane Smith', email: 'jane@example.com', phone: '+2348098765432', campaigns: 1, status: 'Active' },
-  { id: '2', name: 'John Doe', email: 'john@example.com', phone: '+2348012345678', campaigns: 1, status: 'Active' },
-  { id: '3', name: 'Alice Johnson', email: 'alice@example.com', phone: '+2349012345678', campaigns: 0, status: 'Inactive' },
-];
+interface RecipientRow {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  campaigns: number;
+  status: 'Active' | 'Inactive';
+}
 
 export default function AdminRecipientsPage() {
   const [search, setSearch] = useState('');
+  const [recipients, setRecipients] = useState<RecipientRow[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredRecipients = mockRecipients.filter(r => 
+  useEffect(() => {
+    async function fetchRecipients() {
+      try {
+        const data = await api.getRecipients();
+        setRecipients(
+          (data.recipients || []).map((recipient: any) => ({
+            id: recipient._id || recipient.id,
+            name: recipient.userId
+              ? `${recipient.userId.firstName || ''} ${recipient.userId.lastName || ''}`.trim()
+              : recipient.name || 'Recipient',
+            email: recipient.userId?.email || recipient.email || '-',
+            phone: recipient.userId?.phone || recipient.phone || '-',
+            campaigns: recipient.campaignCount || 0,
+            status: recipient.active === false ? 'Inactive' : 'Active'
+          }))
+        );
+      } catch (error) {
+        console.error('Failed to load recipients:', error);
+        toast.error('Failed to load recipients');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchRecipients();
+  }, []);
+
+  const filteredRecipients = recipients.filter(r =>
     r.name.toLowerCase().includes(search.toLowerCase()) ||
     r.email.toLowerCase().includes(search.toLowerCase()) ||
     r.phone.includes(search)
@@ -56,6 +90,13 @@ export default function AdminRecipientsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
+              {loading && (
+                <TableRow>
+                  <TableCell className="text-center text-muted-foreground py-8">
+                    Loading recipients...
+                  </TableCell>
+                </TableRow>
+              )}
               {filteredRecipients.map((recipient) => (
                 <TableRow key={recipient.id}>
                   <TableCell className="font-medium">{recipient.name}</TableCell>

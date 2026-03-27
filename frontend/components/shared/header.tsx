@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { HugeiconsIcon } from '@hugeicons/react';
-import { HeartCheckIcon, MenuSquareIcon, Cancel01Icon } from '@hugeicons/core-free-icons';
+import { HeartCheckIcon, MenuSquareIcon, Cancel01Icon, DashboardSquare01Icon } from '@hugeicons/core-free-icons';
 import { Button } from '@/components/ui/button';
+import { getUserInfo } from '@/lib/auth';
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -17,6 +18,13 @@ const navLinks = [
 export function Header() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userInfo, setUserInfo] = useState<{ role: string | null; name: string | null } | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    setUserInfo(getUserInfo());
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-white/95 backdrop-blur supports-backdrop-filter:bg-white/60">
@@ -45,16 +53,27 @@ export function Header() {
 
           {/* Desktop Auth Buttons */}
           <div className="hidden md:flex items-center gap-3">
-            <Link href="/login">
-              <Button variant="ghost" size="sm">
-                Sign In
-              </Button>
-            </Link>
-            <Link href="/register">
-              <Button size="sm">
-                Get Started
-              </Button>
-            </Link>
+            {mounted && userInfo?.role ? (
+              <Link href={`/${userInfo.role}`}>
+                <Button variant="default" size="sm" className="gap-2">
+                  <HugeiconsIcon icon={DashboardSquare01Icon} className="w-4 h-4" />
+                  Dashboard
+                </Button>
+              </Link>
+            ) : (
+              <>
+                <Link href="/login">
+                  <Button variant="ghost" size="sm">
+                    Sign In
+                  </Button>
+                </Link>
+                <Link href="/register">
+                  <Button size="sm">
+                    Get Started
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -88,16 +107,27 @@ export function Header() {
                 </Link>
               ))}
               <div className="flex gap-2 pt-2">
-                <Link href="/login" className="flex-1">
-                  <Button variant="outline" size="sm" className="w-full">
-                    Sign In
-                  </Button>
-                </Link>
-                <Link href="/register" className="flex-1">
-                  <Button size="sm" className="w-full">
-                    Get Started
-                  </Button>
-                </Link>
+                {mounted && userInfo?.role ? (
+                  <Link href={`/${userInfo.role}`} className="flex-1">
+                    <Button variant="default" size="sm" className="w-full gap-2">
+                      <HugeiconsIcon icon={DashboardSquare01Icon} className="w-4 h-4" />
+                      Dashboard
+                    </Button>
+                  </Link>
+                ) : (
+                  <>
+                    <Link href="/login" className="flex-1">
+                      <Button variant="outline" size="sm" className="w-full">
+                        Sign In
+                      </Button>
+                    </Link>
+                    <Link href="/register" className="flex-1">
+                      <Button size="sm" className="w-full">
+                        Get Started
+                      </Button>
+                    </Link>
+                  </>
+                )}
               </div>
             </nav>
           </div>

@@ -6,34 +6,16 @@ import { useRouter } from 'next/navigation';
 import { HugeiconsIcon } from '@hugeicons/react';
 import {
   AlertCircleIcon,
-  Hospital02Icon,
-  Settings03Icon,
-  UserCircleIcon,
+  Settings03Icon
 } from '@hugeicons/core-free-icons';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { api } from '@/lib/api';
 
-const roles = [
-  {
-    value: 'recipient',
-    label: 'Recipient',
-    description: 'Create campaigns for medical needs',
-    icon: UserCircleIcon,
-  },
-  {
-    value: 'hospital',
-    label: 'Hospital',
-    description: 'Verify campaign authenticity',
-    icon: Hospital02Icon,
-  },
-];
-
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('recipient');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
@@ -76,18 +58,22 @@ export default function LoginPage() {
         return;
       }
       
+      const userRole = data.user.role;
+      
       localStorage.setItem('authToken', data.token);
-      localStorage.setItem('userRole', role);
+      localStorage.setItem('userRole', userRole);
       localStorage.setItem('userEmail', email);
       localStorage.setItem('userName', `${data.user.firstName} ${data.user.lastName}`);
 
       // Set auth cookies for middleware
       const maxAge = 60 * 60 * 24 * 30; // 30 days
       document.cookie = `authToken=${data.token}; path=/; max-age=${maxAge}`;
-      document.cookie = `userRole=${role}; path=/; max-age=${maxAge}`;
+      document.cookie = `userRole=${userRole}; path=/; max-age=${maxAge}`;
 
-      if (role === 'recipient') router.push('/recipient');
-      else if (role === 'hospital') router.push('/hospital');
+      if (userRole === 'recipient') router.push('/recipient');
+      else if (userRole === 'hospital') router.push('/hospital');
+      else if (userRole === 'admin') router.push('/admin');
+      else router.push('/'); // Fallback
     } catch (err: any) {
       setError(err.message || 'Login failed');
     } finally {
@@ -104,29 +90,6 @@ export default function LoginPage() {
 
       <CardContent>
         <form onSubmit={handleLogin} className="space-y-5">
-          {/* Role Selection */}
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-3">Select your role</label>
-            <div className="grid grid-cols-2 gap-2">
-              {roles.map((r) => (
-                <button
-                  key={r.value}
-                  type="button"
-                  onClick={() => setRole(r.value)}
-                  className={`flex flex-col items-center gap-2 p-3 rounded-lg border transition-all duration-200 ${role === r.value
-                    ? 'border-primary bg-primary/5 text-primary'
-                    : 'border-border hover:border-red-300 hover:bg-red-50'
-                    }`}
-                >
-                  <div className={role === r.value ? 'text-primary' : 'text-muted-foreground'}>
-                    <HugeiconsIcon icon={r.icon} size={20} strokeWidth={1.5} />
-                  </div>
-                  <span className="text-sm font-medium">{r.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
           {/* Email */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">Email</label>

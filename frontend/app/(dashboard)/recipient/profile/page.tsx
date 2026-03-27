@@ -31,24 +31,30 @@ export default function RecipientProfilePage() {
     city: '',
     state: '',
   });
+  console.log(profile)
 
   useEffect(() => {
     async function fetchProfile() {
       try {
         const data = await api.getProfile();
-        if (data.user) {
+        console.log('Profile data:', data);
+        if (data) {
+          // Check if data is nested inside user/profile or at the root level
+          const userData = data.user || data;
+          const profileData = data.profile || data;
+
           setProfile({
-            firstName: data.user.firstName || '',
-            lastName: data.user.lastName || '',
-            email: data.user.email || '',
-            phone: data.user.phone || '',
-            nin: data.profile?.nin || '',
-            bvn: data.profile?.bvn || '',
-            dateOfBirth: data.profile?.dateOfBirth || '',
-            gender: data.profile?.gender || '',
-            address: data.profile?.address || '',
-            city: data.profile?.city || '',
-            state: data.profile?.state || '',
+            firstName: userData.firstName || '',
+            lastName: userData.lastName || '',
+            email: userData.email || '',
+            phone: userData.phone || '',
+            nin: profileData.nin || '',
+            bvn: profileData.bvn || '',
+            dateOfBirth: profileData.dateOfBirth || '',
+            gender: profileData.gender || '',
+            address: profileData.address || '',
+            city: profileData.city || '',
+            state: profileData.state || '',
           });
         }
       } catch (err) {

@@ -1,14 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { CheckmarkCircle02Icon, EyeIcon, MoneyAdd01Icon } from '@hugeicons/core-free-icons';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { PulsingBadge } from '@/components/shared/pulsing-badge';
-import { AnimatedSteps } from '@/components/shared/animated-steps';
-import { StatCard } from '@/components/shared/stat-card';
 
 const steps = [
   {
@@ -34,24 +30,9 @@ const steps = [
 ];
 
 const stats = [
-  { 
-    value: '15K+', 
-    label: 'Campaigns Funded',
-    trend: 24,
-    sparklineData: [2, 4, 3, 7, 6, 8, 9, 12, 15]
-  },
-  { 
-    value: '₦2.5B+', 
-    label: 'Total Raised',
-    trend: 18,
-    sparklineData: [3, 5, 4, 8, 7, 10, 11, 14, 18]
-  },
-  { 
-    value: '50K+', 
-    label: 'Active Donors',
-    trend: 31,
-    sparklineData: [1, 3, 2, 6, 5, 9, 10, 13, 17]
-  },
+  { value: '15K+', label: 'Campaigns Funded' },
+  { value: '₦2.5B+', label: 'Total Raised' },
+  { value: '50K+', label: 'Active Donors' },
 ];
 
 const trustFeatures = [
@@ -89,7 +70,8 @@ export default function Home() {
         <div className="container mx-auto px-4 relative">
           <div className="max-w-4xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-50 border border-red-100 text-red-700 text-sm font-medium mb-8">
-              <PulsingBadge text="Live: 156 active campaigns" />
+              <span className="flex h-2 w-2 rounded-full bg-red-500"></span>
+              Trusted by 50,000+ donors worldwide
             </div>
 
             <h1 className="font-heading text-5xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
@@ -121,15 +103,12 @@ export default function Home() {
       {/* Stats Section */}
       <section className="py-16 bg-red-50 border-y border-red-100">
         <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-8 text-center">
             {stats.map((stat, i) => (
-              <StatCard
-                key={i}
-                label={stat.label}
-                value={stat.value}
-                trend={stat.trend}
-                sparklineData={stat.sparklineData}
-              />
+              <div key={i} className="space-y-2">
+                <p className="font-heading text-4xl md:text-5xl font-bold text-primary">{stat.value}</p>
+                <p className="text-muted-foreground font-medium">{stat.label}</p>
+              </div>
             ))}
           </div>
         </div>
@@ -147,22 +126,29 @@ export default function Home() {
             </p>
           </div>
 
-          <AnimatedSteps steps={steps} />
+          <div className="grid md:grid-cols-4 gap-6">
+            {steps.map((step, i) => (
+              <Card key={i} className="border border-border bg-white hover:shadow-lg hover:border-red-200 transition-all duration-300 group">
+                <CardContent className="pt-8 pb-6 px-6">
+                  <span className="font-heading text-5xl font-bold text-red-100 group-hover:text-red-200 transition-colors">
+                    {step.number}
+                  </span>
+                  <h3 className="font-heading text-lg font-semibold text-foreground mt-4 mb-2">
+                    {step.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {step.description}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Trust Section */}
-      <section className="py-24 bg-primary relative overflow-hidden">
-        {/* Animated background elements */}
-        <motion.div
-          className="absolute inset-0 opacity-10"
-          style={{
-            backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.5) 1px, transparent 0)',
-            backgroundSize: '60px 60px',
-          }}
-        />
-
-        <div className="container mx-auto px-4 relative z-10">
+      <section className="py-24 bg-primary">
+        <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="font-heading text-3xl md:text-4xl font-bold text-white mb-12">
               Why Trust CureLedger?
@@ -170,21 +156,13 @@ export default function Home() {
 
             <div className="grid md:grid-cols-3 gap-8">
               {trustFeatures.map((feature, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1, duration: 0.5 }}
-                  viewport={{ once: true }}
-                  whileHover={{ y: -8, transition: { duration: 0.3 } }}
-                  className="text-center group cursor-pointer"
-                >
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/10 text-white mb-4 group-hover:bg-white/20 transition-all duration-300 group-hover:scale-110">
+                <div key={i} className="text-center">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/10 text-white mb-4">
                     {feature.icon}
                   </div>
                   <p className="font-heading text-xl font-bold text-white mb-2">{feature.title}</p>
                   <p className="text-red-100 text-sm">{feature.description}</p>
-                </motion.div>
+                </div>
               ))}
             </div>
           </div>

@@ -30,7 +30,6 @@ export default function RecipientProfilePage() {
     address: '',
     city: '',
     state: '',
-    bvn: '',
   });
 
   useEffect(() => {
@@ -50,7 +49,6 @@ export default function RecipientProfilePage() {
             address: data.profile?.address || '',
             city: data.profile?.city || '',
             state: data.profile?.state || '',
-            bvn: data.profile?.bvn || '',
           });
         }
       } catch (err) {

@@ -21,6 +21,8 @@ export default function RecipientDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  console.log(myCampaigns)
+
   useEffect(() => {
     async function fetchCampaigns() {
       try {
@@ -129,14 +131,14 @@ export default function RecipientDashboard() {
             <p className="text-muted-foreground">Loading campaigns...</p>
           ) : hasActiveCampaign ? (
             <div className="space-y-4">
-              {myCampaigns.slice(0, 1).map((campaign) => {
+              {myCampaigns.slice(0, 1).map((campaign, index) => {
                 const raised =
                   campaign.amountRaised || campaign.raisedAmount || 0;
                 const progress = (raised / campaign.targetAmount) * 100;
 
                 return (
                   <div
-                    key={campaign.id}
+                    key={campaign.id || campaign._id || index}
                     className="border border-border rounded-lg p-5 hover-lint"
                   >
                     <div className="flex items-start justify-between gap-4 mb-4">
@@ -179,12 +181,12 @@ export default function RecipientDashboard() {
                     </div>
 
                     <div className="flex gap-2">
-                      <Link href={`/campaign/${campaign.id}`}>
+                      <Link href={`/campaign/${campaign._id}`}>
                         <Button size="sm" variant="outline">
                           View Campaign
                         </Button>
                       </Link>
-                      <Link href={`/recipient/campaigns/${campaign.id}`}>
+                      <Link href={`/recipient/campaigns/${campaign._id}`}>
                         <Button size="sm" variant="outline">
                           Edit
                         </Button>

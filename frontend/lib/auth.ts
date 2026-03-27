@@ -28,8 +28,14 @@ export function getUserInfo() {
 // Clear user session
 export function logout() {
   if (typeof window === 'undefined') return;
+  localStorage.removeItem('authToken');
   localStorage.removeItem('userRole');
   localStorage.removeItem('userEmail');
   localStorage.removeItem('userName');
-  window.location.href = '/';
+  
+  // Clear cookies
+  document.cookie = 'authToken=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:01 GMT';
+  document.cookie = 'userRole=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:01 GMT';
+  
+  window.location.href = '/login';
 }

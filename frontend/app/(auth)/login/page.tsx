@@ -81,6 +81,11 @@ export default function LoginPage() {
       localStorage.setItem('userEmail', email);
       localStorage.setItem('userName', `${data.user.firstName} ${data.user.lastName}`);
 
+      // Set auth cookies for middleware
+      const maxAge = 60 * 60 * 24 * 30; // 30 days
+      document.cookie = `authToken=${data.token}; path=/; max-age=${maxAge}`;
+      document.cookie = `userRole=${role}; path=/; max-age=${maxAge}`;
+
       if (role === 'recipient') router.push('/recipient');
       else if (role === 'hospital') router.push('/hospital');
     } catch (err: any) {

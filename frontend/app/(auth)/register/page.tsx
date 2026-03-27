@@ -66,7 +66,10 @@ export default function RegisterPage() {
       localStorage.setItem('userRole', response.user.role || role);
       localStorage.setItem('userEmail', response.user.email || formData.email);
       localStorage.setItem('userName', `${response.user.firstName || formData.firstName} ${response.user.lastName || formData.lastName}`);
-      document.cookie = `userRole=${response.user.role || role}; path=/; max-age=${60 * 60 * 24 * 30}`;
+      
+      const maxAge = 60 * 60 * 24 * 30; // 30 days
+      document.cookie = `authToken=${response.token}; path=/; max-age=${maxAge}`;
+      document.cookie = `userRole=${response.user.role || role}; path=/; max-age=${maxAge}`;
 
       toast.success('Account created successfully');
 
